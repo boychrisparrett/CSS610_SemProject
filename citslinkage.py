@@ -121,16 +121,21 @@ class CITSLinkage:
                 link.setTempEu(0)
             else:
                 #NL: set temp-eu max [cboeu1] of my-out-links with [citlink? = ticks]
-                orig.getMaxOutlinks(t,c.getUID(),"cboeu")
-                    #NL: set minpref min [diffpref1] of my-out-links with [citlink? = ticks]
-                    c.getMinOutlinks(t,c.getUID(),"diffpref")
+                link.setTempEu( orig.getMaxOutlinks(t,c.getUID(),"cboeu") )
+                
+                #NL: set minpref min [diffpref1] of my-out-links with citlink? = ticks]
+                link.setMinpref( c.getMinOutlinks(t,c.getUID(),"diffpref") )
             #NL: ask end2 [
             #NL: if empty? [cboeu1] of my-in-links with [citlink? = ticks]:
-                if getLinksToNode(t,c) is None:
-            #NL:          set temp-eu 0
-            #else:
-            #NL:          set temp-eu max [cboeu2] of my-in-links  with [citlink? = ticks]
-            #NL:          set minpref min [diffpref2] of my-in-links with [citlink? = ticks]
+            if getLinksFromNode(t,dest) is None:
+                #NL: set temp-eu 0
+                link.setTempEu(0)
+            else:               
+                #NL: set temp-eu max [cboeu2] of my-in-links  with [citlink? = ticks]
+                link.setTempEu( orig.getMaxOutlinks(t,c.getUID(),"cboeu") )
+                           
+                #NL: set minpref min [diffpref2] of my-in-links with [citlink? = ticks]
+                link.setMinpref( c.getMinOutlinks(t,c.getUID(),"diffpref") )
 
     ##----------------------------------------------------------------------
     ## Name:
