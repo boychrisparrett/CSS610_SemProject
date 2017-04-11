@@ -1,3 +1,48 @@
+##############################################################################
+# Author: Christopher M. Parrett
+# Homework #2, due 08FEB2017
+# Computational Social Science 610: Agent Based Modeling and Simulation
+# Spring 2017, Department of Computational and Data Sciences,
+# Under the most excellent tutelage of Dr. R Axtell, George Mason Univ
+#
+# Developed on a Windows 10 platform, AMD PhenomII X6 3.3GHz w/ 8GB RAM
+# using Python 3.5.2 | Anaconda 4.2.0 (64-bit).
+##############################################################################
+##############################################################################
+
+from link_cits import *
+from cits import *
+
+##############################################################################
+##############################################################################
+# CLASS::
+#
+# Purpose:
+#
+#
+class StakeholderLinkage:
+    def __init__(self,max_t):
+        self.linkshldrs = {}
+    ##----------------------------------------------------------------------
+    ## Name:
+    ##
+    ## Desc:
+    ##
+    ## Paramters:
+    ##    1)
+    ##    2)
+    ##    3)
+    ##
+    ## Returns: Nothing
+    def FormLinks(self,t,cits):
+        links = []
+        for ci in cits:
+            #get nodes UIDs within range of ci
+            ret = ci.NodesWithinRange()
+            for l in range(len(ret)):
+               links.append( LINK_STAKEHOLDERS(ci,ret[l]) )
+               links[l].setHidden(True)
+        self.linkshldrs[t] = links
 
 #to stakeholder-talk
 #ask cits with [stakeholder? = 1] [
