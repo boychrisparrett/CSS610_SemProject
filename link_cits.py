@@ -10,8 +10,8 @@
 ##############################################################################
 ##############################################################################
 
-from link import *
 from entity import *
+from link import *
 
 ##############################################################################
 ##############################################################################
@@ -22,32 +22,34 @@ from entity import *
 #
 class LINK_CITS(LINK):
     def __init__(self,orig,dest):
-        LINK.__init__(orig,dest)
+        LINK.__init__(self,orig,dest)
         self.intereu = 0
         self.tempeu = 0
         self.cbo = Entity(0,0,0)
 
         ###################################################################
         #Below are redundant, but used for traceability with NetLogo Code
-        self.pref = (0,0)
-        self.power = (0,0)
-        self.eu = (0,0)
-        self.cboeu = (0,0)
-        self.diffpref = (0,0)
+        self.pref = [0,0]
+        self.power = [0,0]
+        self.eu = [0,0]
+        self.cboeu = [0,0]
+        self.diffpref = [0,0]
 
     ### Set/Get Inter/Temp Expected Utility
     def setIntereu(self,x): self.intereu = x
     def getIntereu(self): return self.intereu
+    
     def setTempEu(self,x): self.tempeu = 0
     def getTempEu(self): return self.tempeu
 
     ### Set/Get CBO Expected Utility (EU) / Power (POW) / Pref (PRF)
-    def setCbo(self,x,v): self.setEntity(x,v)
-    def getCbo(self,x): return self.getEntity(x)
+    def setCbo(self,x,v): self.cbo.setEntity(x,v)
+    def getCbo(self,x): return self.cbo.getEntity(x)
 
 
     ###################################################################
     ## Below are redundant, but used for traceability with NetLogo Code
+    ## allows the link to store the variables for each of its nodes
     def setCboeu(self,idx,x): self.cboeu[idx] = x
     def setPref(self,idx,x): self.pref[idx] = x
     def setPower(self,idx,x): self.power[idx] = x

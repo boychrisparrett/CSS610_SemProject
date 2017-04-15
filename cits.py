@@ -1,9 +1,9 @@
-import * from Agent
-import * from Entity
+from entity import *
+from agent import *
 
 class CITS(Agent):
     def __init__(self,uid,x,y):
-        Agent.__init__(uid,x,y)
+        Agent.__init__(self,uid,x,y)
 
         #Customized
         self.proximity = 0
@@ -55,17 +55,17 @@ class CITS(Agent):
     def getEdu(self): return self.edu
     def getEdu_Scale(self): return self.edu_scale
     def getRawpower(self): return self.rawpower
-    def getMinpref(self): return self.minprefe
+    def getMinpref(self): return self.minpref
     def getTurcbo(self): return self.turcbo
     def getStemp_Eu(self): return self.stemp_eu
     def getSturcbo(self): return self.sturcbo
 
-    def getOwn(self,x): return self.getEntity(x)
-    def getSown(self,x): return self.getEntity(x)
-    def getCbo(self,x): return self.getEntity(x)
-    def getScbo(self,x): return self.getEntity(x)
+    def getOwn(self,x): return self.own.getEntity(x)
+    def getSown(self,x): return self.sown.getEntity(x)
+    def getCbo(self,x): return self.cbo.getEntity(x)
+    def getScbo(self,x): return self.scbo.getEntity(x)
 
-    def setOwn(self,x,v): self.setEntity(x,v)
-    def setSown(self,x,v): self.setEntity(x,v)
-    def setCbo(self,x,v): self.setEntity(x,v)
-    def setScbo(self,x,v): self.setEntity(x,v)
+    def setOwn(self,x,v): self.own.setEntity(x,v)
+    def setSown(self,x,v): self.sown.setEntity(x,v)
+    def setCbo(self,x,v): self.cbo.setEntity(x,v)
+    def setScbo(self,x,v): self.scbo.setEntity(x,v)

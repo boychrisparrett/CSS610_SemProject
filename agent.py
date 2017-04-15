@@ -32,7 +32,7 @@ class Agent:
 
     #####################################################################
     ## Standard Set Routines
-    def setUID(): self.UID = x
+    def setUID(self,x): self.UID = x
     def setIdeo(self,x): self.ideo = x
     def setWealth(self,x): self.wealth = x
     def setPower(self,x): self.power = x
