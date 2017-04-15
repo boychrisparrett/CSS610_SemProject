@@ -48,7 +48,7 @@ class Agent:
     def getIdeo(self): return self.ideo
     def getWealth(self): return self.wealth
     def getPower(self): return self.power
-    def getStakeholder(self,x): return self.stakeholder
+    def getStakeholder(self): return self.stakeholder
     def getColor(self): return self.color
     def getXCor(self): return self.xcor
     def getYCor(self): return self.ycor
