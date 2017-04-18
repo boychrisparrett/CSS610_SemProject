@@ -36,9 +36,10 @@ class CITS_Collection:
         self.cits = []
         self.numcits = 0
 
-    def getCITS(self,idx): return self.cits[idx]
-    def setCITS(self,idx,c): self.cits[idx] = c
+    def getCIT(self,idx): return self.cits[idx]
+    def setCIT(self,idx,c): self.cits[idx] = c
 
+    def getCITS(self): return self.cits
     def getNumCITS(self): return self.numcits
 
     ##----------------------------------------------------------------------
@@ -108,6 +109,7 @@ class CITS_Collection:
         for c in self.cits:
             c.setPower( c.getRawpower() / maxpower )
             c.setOwn(Entity.POW, c.getPower())
+
 
     def UpdateSatisfaction(self,base,tax,gov_ideo):
         #ask cits [

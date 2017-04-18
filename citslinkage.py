@@ -21,7 +21,17 @@ from cits import *
 #
 #
 class CITSLinkage:
-
+    ##----------------------------------------------------------------------
+    ## Name:
+    ##
+    ## Desc:
+    ##
+    ## Paramters:
+    ##    1)
+    ##    2)
+    ##    3)
+    ##
+    ## Returns: Nothing
     def __init__(self,max_t):
         self.linkcits = {}
 
@@ -49,7 +59,7 @@ class CITSLinkage:
     ##----------------------------------------------------------------------
     ## Name:
     ##
-    ## Desc:
+    ## Desc: first block of code in "cits-talk" procedure
     ##
     ## Paramters:
     ##    1)
@@ -87,11 +97,11 @@ class CITSLinkage:
 
             ## Calculate and store the exepected utility of orig's CBO
             #NL: set cboeu1 0.5 * (1.5 * eu1 + intereu)
-            link.setCboeu(LINK.ORIGIDX,0.5 * (1.5 * eu1 + link.getIntereu())
+            link.setCboeu(LINK.ORIGIDX,0.5 * (1.5 * eu1 + link.getIntereu()))
 
             ## Calculate and store the exepected utility of dest's CBO
             #NL: set cboeu2 0.5 * (1.5 * eu2 + intereu)
-            link.setCboeu((LINK.DESTIDX,0.5 * (1.5 * eu2 + link.getIntereu())
+            link.setCboeu(LINK.DESTIDX,0.5 * (1.5 * eu2 + link.getIntereu()))
 
             ## Calculate and store the preference of CBO
             #NL: set cbopref
@@ -114,6 +124,7 @@ class CITSLinkage:
             #NL: set diffpref2
             link.setDiffpref(LINK.DESTIDX, abs(link.getCbo(Entity.E_PRF) - pref2))
 
+
             #NL: ask end1
             #NL: if empty? [cboeu1] of my-out-links with [citlink? = ticks]:
             if self.getLinksFromNode(t,orig) is None:
@@ -124,6 +135,8 @@ class CITSLinkage:
 
                 #NL: set minpref min [diffpref1] of my-out-links with citlink? = ticks]
                 link.setMinpref( orig.getMinOutlinks(t,orig.getUID(),"diffpref") )
+
+
             #NL: ask end2 [
             #NL: if empty? [cboeu1] of my-in-links with [citlink? = ticks]:
             if self.getLinksFromNode(t,dest) is None:
@@ -155,15 +168,19 @@ class CITSLinkage:
             #if cboeu1 < [temp-eu] of end1 [die]
             if link.getCboeu(LINK_CITS.ORIGIDX) < orig.getTemp_Eu():
                 self.linkcits[t].remove(link)
+
             #if cboeu1 < [own-eu] of end1 [die]
             elif link.getCboeu(LINK_CITS.ORIGIDX) < orig.getOwn(Entity.E_EU):
                 self.linkcits[t].remove(link)
+
             #if cboeu2 <= [own-eu] of end2 [die]
             elif link.getCboeu(LINK_CITS.DESTIDX) < dest.getOwn(Entity.E_EU):
                 self.linkcits[t].remove(link)
+
             #if diffpref2 > [minpref] of end2 [die]
             elif link.getDiffpref(LINK_CITS.DESTIDX) < dest.getMinpref():
                 self.linkcits[t].remove(link)
+
             # ifelse ([temp-eu] of end1 > [own-eu] of end1) and
             #        ([temp-eu] of end2 > [own-eu] of end2)
             elif (orig.getTempEu() > orig.getOwn(Entity.EU)) and (dest.getTempEu() > dest.getOwn(Entity.EU)) :
@@ -260,118 +277,180 @@ class CITSLinkage:
     ## Returns: Nothing
     # ask linkcits with [citlink? < ticks] [
     def ManagePreviousLink(self, t, cits):
-       for link in self.linkcits[t]:
-           #ask linkcits with [citlink? < ticks] [
-           orig = cits.getCITS( link.getOrignode() )
-           dest = cits.getCITS( link.getDestnode() )
-           #if [own-pref] of end1 != [own-pref] of end2 [
-           if orig.getOwn(Entity.PRF) != dest.getOwn(Entity.PRF):
-               #    set pref1 [own-pref] of end1
-               pref1 = orig.getOwn(Entity.PRF)
-               #    set power1 [own-power] of end1
-               power1 = orig.getOwn(Entity.PRF)
-               #    set eu1 [own-eu] of end1
-               eu1 = orig.getOwn(Entity.EU)
-               #    set pref2 [own-pref] of end2
-               pref2 = dest.getOwn(Entity.PRF)
-               #    set power2 [own-power] of end2
-               power2 = dest.getOwn(Entity.POW)
-               #    set eu2 [own-eu] of end2
-               eu2 = dest.getOwn(Entity.EU)
-               #    set intereu (power1 + power2) * 1.5 * (100 - abs(pref1 - pref2))
-               intereu = (power1 + power2) * 1.5 * (100 - abs(pref1 - pref2))
-               #    set cboeu1 0.5 * (1.5 * eu1 + intereu)
-               orig.setCbo(Entity.EU, 0.5 * (1.5 * eu1 + intereu))
-               #    set cboeu2 0.5 * (1.5 * eu2 + intereu)
-               dest.setCbo(Entity.EU, 0.5 * (1.5 * eu2 + intereu))
-               #    set cbopref ((pref1 * power1 + pref2 * power2)/(power1 + power2 + 0.0000001))
-               link.setCbo(Entity.PRF,((pref1 * power1 + pref2 * power2)/(power1 + power2 + 0.0000001))
-               #    set cbopower (power1 + power2) * 1.5
-               link.setCbo(Entity.POW,(power1 + power2) * 1.5)
+        for link in self.linkcits[t]:
+            #ask linkcits with [citlink? < ticks] [
+            orig = cits.getCITS( link.getOrignode() )
+            dest = cits.getCITS( link.getDestnode() )
 
-               #if(cboeu1 < [own-eu] of end1) or (cboeu2 < [own-eu] of end2) [
-               if (cboeu1 < orig.getOwn(Entity.EU) or (cboeu2 < dest.getOwn(Entity.EU):
-               #    ask end1 [
-               #    if count my-out-links with [citlink? = 2] = 0 and count my-in-links with [citlink? = 2] = 0 [
-               #!!! NOT SURE WHAT CITLINK? = 2 CONDITION IS OR WHERE IT IS SET
+            #if [own-pref] of end1 != [own-pref] of end2 [
+            if orig.getOwn(Entity.PRF) != dest.getOwn(Entity.PRF):
+                #set pref1 [own-pref] of end1
+                pref1 = orig.getOwn(Entity.PRF)
+
+                #set power1 [own-power] of end1
+                power1 = orig.getOwn(Entity.PRF)
+
+                #set eu1 [own-eu] of end1
+                eu1 = orig.getOwn(Entity.EU)
+
+                #set pref2 [own-pref] of end2
+                pref2 = dest.getOwn(Entity.PRF)
+
+                #set power2 [own-power] of end2
+                power2 = dest.getOwn(Entity.POW)
+
+                #set eu2 [own-eu] of end2
+                eu2 = dest.getOwn(Entity.EU)
+
+                #set intereu (power1 + power2) * 1.5 * (100 - abs(pref1 - pref2))
+                link.setIntereu ((power1 + power2) * 1.5 * (100 - abs(pref1 - pref2)))
+
+                #set cboeu1 0.5 * (1.5 * eu1 + intereu)
+                link.setCboeu(LINK.ORIGIDX,0.5 * (1.5 * eu1 + link.getIntereu()))
+
+                #set cboeu2 0.5 * (1.5 * eu2 + intereu)
+                link.setCboeu(LINK.DESTIDX,0.5 * (1.5 * eu2 + link.getIntereu()))
+
+                #set cbopref ((pref1 * power1 + pref2 * power2)/(power1 + power2 + 0.0000001))
+                link.setCbo(Entity.PRF,((pref1 * power1 + pref2 * power2)/(power1 + power2 + 0.0000001)))
+
+                #set cbopower (power1 + power2) * 1.5
+                link.setCbo(Entity.POW,(power1 + power2) * 1.5)
+
+                #if(cboeu1 < [own-eu] of end1) or (cboeu2 < [own-eu] of end2) [
+                if (link.getCboeu(LINK.ORIGIDX) < orig.getOwn(Entity.EU)) or (link.setCboeu(LINK.DESTIDX) < dest.getOwn(Entity.EU)):
+                    #ask end1 [
+                    #if count my-out-links with [citlink? = 2] = 0 and count my-in-links with [citlink? = 2] = 0 [
+
+                    #!!! NOT SURE WHAT CITLINK? = 2 CONDITION IS OR WHERE IT IS SET
                     if len(self.getLinksFromNode(t,orig)) == 0 and len(self.getLinkstToNode(t,orig)) == 0:
-               #        set turcbo 1
+                        #set turcbo 1
                         orig.setTurcbo(1)
-               #        set cbo-pref 0
+
+                        #set cbo-pref 0
                         orig.setCbo(Entity.PRF,0)
-               #        set cbo-power 0
+
+                        #set cbo-power 0
                         orig.setCbo(Entity.POW,0)
-               #        set stakeholder? 0
+
+                        #set stakeholder? 0
                         orig.setStakeholder(False)
-               #        set own-power own-power / 1.5
+
+                        #set own-power own-power / 1.5
                         orig.setOwn(Entity.POW, orig.getOwn(Entity.POW) * 1.5)
-               #        set own-eu (100 - abs (own-pref - own-pref)) * own-power
+
+                        #set own-eu (100 - abs (own-pref - own-pref)) * own-power
                         orig.setOwn(Entity.EU, 100 * orig.getOwn(Entity.POW))
-               #        set shape "circle"
+
+                        #set shape "circle"
                         orig.setShape('o')
-               #    ask end2 [
+                    #ask end2 [
+                    #!!! NOT SURE WHAT CITLINK? = 2 CONDITION IS OR WHERE IT IS SET
                     if len(self.getLinksFromNode(t,dest)) == 0 and len(self.getLinkstToNode(t,dest)) == 0:
-               #!!! NOT SURE WHAT CITLINK? = 2 CONDITION IS OR WHERE IT IS SET
-               #        set turcbo 1
+
+                        #set turcbo 1
                         dest.setTurcbo(1)
-               #        set cbo-pref 0
+
+                        #set cbo-pref 0
                         dest.setCbo(Entity.PRF,0)
-               #        set cbo-power 0
+
+                        #set cbo-power 0
                         dest.setCbo(Entity.POW,0)
-               #        set stakeholder? 0
+
+                        #set stakeholder? 0
                         dest.setStakeholder(False)
-               #        set own-power own-power / 1.5
+
+                        #set own-power own-power / 1.5
                         dest.setOwn(Entity.POW, dest.getOwn(Entity.POW) * 1.5)
-               #        set own-eu (100 - abs (own-pref - own-pref)) * own-power
+
+                        #set own-eu (100 - abs (own-pref - own-pref)) * own-power
                         dest.setOwn(Entity.EU, 100 * dest.getOwn(Entity.POW))
-               #        set shape "circle"
+
+                        #set shape "circle"
                         dest.setShape('o')
-               #    die
+                    #die
                     self.linkcits[t].remove(link)
-               else:
-               #    ask end1
-               #    ifelse count my-out-links with [citlink? = 2] = 0 and count my-in-links with [citlink? = 2] = 0 [
-               #!!! NOT SURE WHAT CITLINK? = 2 CONDITION IS OR WHERE IT IS SET
+                else:
+                    #ask end1
+                    #ifelse count my-out-links with [citlink? = 2] = 0 and count my-in-links with [citlink? = 2] = 0 [
+                    #!!! NOT SURE WHAT CITLINK? = 2 CONDITION IS OR WHERE IT IS SET
                     if len(self.getLinksFromNode(t,orig)) == 0 and len(self.getLinkstToNode(t,orig)) == 0:
-               #        set turcbo 2
+                        #set turcbo 2
                         orig.setTurcbo(2)
-               #        set stakeholder? 0
+
+                        #set stakeholder? 0
                         orig.setStakeholder(False)
-               #        set own-pref [cbo-pref] of other-end
+
+                        #set own-pref [cbo-pref] of other-end
                         orig.setOwn(Entity.PRF,dest.getOwn(Entity.PRF))
-               #        set cbo-pref [cbo-pref] of other-end
+
+                        #set cbo-pref [cbo-pref] of other-end
                         orig.setCbo(Entity.PRF,dest.getOwn(Entity.PRF))
-               #        set cbo-power 0
+
+                        #set cbo-power 0
                         orig.setCbo(Entity.POW,0)
-               #        set own-eu (100 - abs (own-pref - own-pref)) * own-power
+
+                        #set own-eu (100 - abs (own-pref - own-pref)) * own-power
                         orig.setOwn(Entity.EU, 100 * dest.getOwn(Entity.POW))
-               #    ELSE
                     else:
-               #        set stakeholder? 1
+                        #set stakeholder? 1
                         orig.setStakeholder(1)
-               #
-               #    ask end2 [
-               #    ifelse count my-out-links with [citlink? = 2] = 0 and count my-in-links with [citlink? = 2] = 0 [
-               #!!! NOT SURE WHAT CITLINK? = 2 CONDITION IS OR WHERE IT IS SET
+
+                    #ask end2 [
+                    #ifelse count my-out-links with [citlink? = 2] = 0 and count my-in-links with [citlink? = 2] = 0 [
+                    #!!! NOT SURE WHAT CITLINK? = 2 CONDITION IS OR WHERE IT IS SET
                     if len(self.getLinksFromNode(t,dest)) == 0 and len(self.getLinkstToNode(t,dest)) == 0:
-               #        set turcbo 2
+                        #set turcbo 2
                         dest.setTurcbo(2)
-               #        set stakeholder? 0
+
+                        #set stakeholder? 0
                         dest.setStakeholder(False)
-               #        set own-pref [cbo-pref] of other-end
+
+                        #set own-pref [cbo-pref] of other-end
                         dest.setOwn(Entity.PRF, orig.getOwn(Entity.PRF))
-               #        set cbo-pref [cbo-pref] of other-end
+
+                        #set cbo-pref [cbo-pref] of other-end
                         dest.setCbo(Entity.PRF, orig.getOwn(Entity.PRF))
-               #        set cbo-power 0
+
+                        #set cbo-power 0
                         dest.setCbo(Entity.POW,0)
-               #        set own-eu (100 - abs (own-pref - own-pref)) * own-power
+
+                        #set own-eu (100 - abs (own-pref - own-pref)) * own-power
                         dest.setOwn(Entity.EU, 100 * dest.getOwn(Entity.POW))
-               #    Else
                     else:
-               #        set stakeholder? 1
+                        #set stakeholder? 1
                         dest.setStakeholder(1)
-               #    set hidden? FALSE
+                    #set hidden? FALSE
                     self.linkcits[t].setHidden(False)
+
+    ##----------------------------------------------------------------------
+    ## Name:
+    ##
+    ## Desc:
+    ##
+    ## Paramters:
+    ##    1)
+    ##    2)
+    ##    3)
+    ##
+    ## Returns: Nothing
+    def UpdateCITS(self,cits):
+        #ask cits with [stakeholder? = 1] [
+        for c in cits:
+            if c.getStakeholder():
+                #!!! I am not convinced the below is theoretically correct (syntactically ok). Did he really mean to nest them this way? t2 + t3 - own * (t4 + t5 - 1)???
+                #set cbo-power = (sum [cbopower] of my-out-links with [citlink? > 0]) + (sum [cbopower] of my-in-links with [citlink? > 0]) - own-power * ((count my-out-links with [citlink? > 0]) + (count my-in-links with [citlink? > 0]) - 1)]
+
+                #t2 = sum [cbopower] of my-out-links with [citlink? > 0]
+                #t4 = count my-out-links with [citlink? > 0]
+                t2,t4 = self.getSumOutlinksP(Entity.POW)
+
+                #t3 = sum [cbopower] of my-in-links with [citlink? > 0]
+                #t5 = count my-in-links with [citlink? > 0]
+                t3,t5 = self.getSumInlinksP(Entity.POW)
+
+                c. setCbo(Entity.POW,(t2) + (t3) - own-power * ((t4) + (t5) - 1))
+
 
     ##----------------------------------------------------------------------
     ## Name:
@@ -420,8 +499,10 @@ class CITSLinkage:
     ##    3)
     ##
     ## Returns: Nothing
-    def removeLink(self,t,orig,dest)
-        self.dlinkcits[t][orig].remove(dest)
+    def removeLink(self,t,orig,dest):
+        for link in linkcits[t]:
+            if self.linkcits[t].getOrignode() == orig and self.linkcits[t].getDestnode() == dest:
+                linkcits[t].remove(link)
 
     ##----------------------------------------------------------------------
     ## Name:
@@ -436,7 +517,7 @@ class CITSLinkage:
     ## Returns: Nothing
     def getCurrentMaxOutlinks(self, t, node, param):
         lv = 0.0
-        for i in self.dlinkcits[t]:
+        for i in self.linkcits[t]:
             if i.getOrignode() == node and lv < i.getCbo(param):
                     lv = i.getCbo(param)
         return lv
@@ -454,7 +535,7 @@ class CITSLinkage:
     ## Returns: Nothing
     def getCurrentMaxInlinks(self, t, node, param):
         lv = 0.0
-        for i in self.dlinkcits[t]:
+        for i in self.linkcits[t]:
             if i.getDestnode() == node and lv < i.getCbo(param):
                 lv = i.getCbo(param)
         return lv
@@ -472,7 +553,7 @@ class CITSLinkage:
     ## Returns: Nothing
     def getCurrentMinOutlinks(self, t, node, param):
         lv = 100000000.0
-        for i in self.dlinkcits[t]:
+        for i in self.linkcits[t]:
             if i.getOrignode() == node and lv > i.getCbo(param):
                     lv = i.getCbo(param)
         return lv
@@ -490,7 +571,49 @@ class CITSLinkage:
     ## Returns: Nothing
     def getCurrentMinInlinks(self, t, node, param):
         lv = 100000000.0
-        for i in self.dlinkcits[t]:
+        for i in self.linkcits[t]:
             if i.getDestnode() == node and lv > i.getCbo(param):
                 lv = i.getCbo(param)
         return lv
+
+
+
+    ##----------------------------------------------------------------------
+    ## Name:
+    ##
+    ## Desc:
+    ##
+    ## Paramters:
+    ##    1)
+    ##    2)
+    ##    3)
+    ##
+    ## Returns: Nothing
+    def getSumOutlinksP(self, t, node, param):
+        lv = 0
+        cnt = 0
+        for i in self.linkcits[t]:
+            if if i.getOrignode() == node and i.getCitlink() > 0:
+                lv += i.getCbo(param)
+                cnt+=1
+        return lv,cnt
+
+    ##----------------------------------------------------------------------
+    ## Name:
+    ##
+    ## Desc:
+    ##
+    ## Paramters:
+    ##    1)
+    ##    2)
+    ##    3)
+    ##
+    ## Returns: Nothing
+    def getSumInlinksP(self, t, node, param):
+        lv = 0
+        cnt = 0
+        for i in self.linkcits[t]:
+            if i.getDestnode() == node and i.getCitlink() > 0:
+                lv += i.getCbo(param)
+                cnt+=1
+        return lv,cnt

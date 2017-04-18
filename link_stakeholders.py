@@ -22,21 +22,26 @@ from entity import *
 #
 class LINK_STAKEHOLDERS(LINK):
     def __init__(self,orig,dest):
-        LINK.__init__(orig,dest)
+        LINK.__init__(self,orig,dest)
         self.s = Entity(0,0,0)
         self.scbo = Entity(0,0,0)
+        self.stemp = Entity(0,0,0)
         self.sintereu = 0
-
         self.scboeu = [0,0]
+        self.sturcbo = [0,0]
 
-    def setS(self,x,v): self.setEntity(x,v)
-    def setScbo(self,x,v): self.setEntity(x,v)
+    def setS(self,x,v): self.s.setEntity(x,v)
+    def setScbo(self,x,v): self.scbo.setEntity(x,v)
     def setSintereu(self,x): self.sintereu = x
+    def setStemp(self,x,v): self.stemp.setEntity(x,v)
 
-    def getS(self,x): return self.getEntity(x)
-    def getScbo(self,x): return self.getEntity(x)
+    def getS(self,x): return self.s.getEntity(x)
+    def getScbo(self,x): return self.scbo.getEntity(x)
     def getSintereu(self): return self.sintereu
+    def getStemp(self,x): return self.stemp.getEntity(x)
 
     def getScboeu(self,idx): return self.scboeu[idx]
     def setScboeu(self,idx,x): self.scboeu[idx] = x
 
+    def getSturcbo(self,idx): return self.sturcbo[idx]
+    def setSturcbo(self,idx,x): self.sturcbo[idx] = x
