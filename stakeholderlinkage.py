@@ -87,17 +87,19 @@ class StakeholderLinkage:
             seu2= dest.getSown(Entity.EU)
 
             # set scbopref ((spref1 * spower1 + spref2 * spower2)/(spower1 + spower2 + 0.0000001))
-            scbopref = ((spref1 * spower1 + spref2 * spower2)/(spower1 + spower2 + 0.0000001))
+            link.setScbo(Entity.PRF, ((spref1 * spower1 + spref2 * spower2)/(spower1 + spower2 + 0.0000001)))
 
             # set scbopower spower1 + spower2
-            scbopower = spower1 + spower2
-            #      ;;set scboeu scbopower * (100 - abs (scbopref - scbopref))
-
+            link.setScbo(Entity.POW, spower1 + spower2)
+			
+            #!!!set scboeu scbopower * (100 - abs (scbopref - scbopref))
+			link.setScbo(Entity.EU, link.getScbo(Entity.POW) * 100 )
+			
             # set scboeu1 (100 - abs(scbopref - spref1)) * (spower1 + (scbopower - spower1) * (spower1 / (scbopower + 0.000001)))
-            link.setScboeu(LINK.ORIGIDX, (100 - abs(scbopref - spref1)) * (spower1 + (scbopower - spower1) * (spower1 / (scbopower + 0.000001))))
+            link.setScboeu(LINK.ORIGIDX, (100 - abs(link.getScbo(Entity.PRF) - spref1)) * (spower1 + (link.getScbo(Entity.POW) - spower1) * (spower1 / (link.getScbo(Entity.POW) + 0.000001))))
 
             # set scboeu2 (100 - abs(scbopref - spref2)) * (spower2 + (scbopower - spower2) * (spower2 / (scbopower + 0.000001)))
-            link.setScboeu(LINK.DESTIDX, (100 - abs(scbopref - spref2)) * (spower2 + (scbopower - spower2) * (spower2 / (scbopower + 0.000001))))
+            link.setScboeu(LINK.DESTIDX, (100 - abs(link.getScbo(Entity.PRF) - spref2)) * (spower2 + (link.getScbo(Entity.POW) - spower2) * (spower2 / (link.getScbo(Entity.POW) + 0.000001))))
 
 
             #ask end1 [
@@ -149,7 +151,7 @@ class StakeholderLinkage:
             if orig.getStemp(Entity.EU) > orig.getSown(Entity.EU) and dest.getStemp(Entity.EU) > dest.getSown(Entity.EU)
                 #ask end1 [
                 #set sturcbo? 1
-                link.setTurcbo(LINK.ORIGIDX,1)
+                orig.setTurcbo(1)
 
                 #!!! IS THIS CORRECT???
                 maxval = self.getMaxOutlinks("scbopref")
@@ -236,16 +238,17 @@ class StakeholderLinkage:
         #----------
         #ask linkstakeholders with [cbolink? < ticks] [
         for link in self.linkcits[t]:
-           #ask linkcits with [citlink? < ticks] [
-           orig = cits.getCITS( link.getOrignode() )
-           dest = cits.getCITS( link.getDestnode() )
+			#ask linkcits with [citlink? < ticks] [
+			orig = cits.getCITS( link.getOrignode() )
+			dest = cits.getCITS( link.getDestnode() )
 
-            #set spref1 [sown-pref] of end1
+			#set spref1 [sown-pref] of end1
             pref1 = orig.getSown(Entity.PRF)
             #set spower1 [sown-power] of end1
             spower1 = orig.getSown(Entity.POW)
             #set seu1 [sown-eu] of end1
             seu1 = orig.getSown(Entity.EU)
+			
             #set spref2 [sown-pref] of end2
             spref2 = dest.getSown(Entity.PRF)
             #set spower2 [sown-power] of end2
@@ -262,9 +265,11 @@ class StakeholderLinkage:
             #;;set scboeu scbopower * (100 - abs (scbopref - scbopref))
             link.setScbo(Entity.EU, (spower1 + spower2) * 100)
 
+			#!!! Possible Nesting Errors: (100 - ABS(X1-X2)) * (Y1 + (Y - Y1) * (Y1 / (Y + 0...1)))
             #set scboeu1 (100 - abs(scbopref - spref1)) * (spower1 + (scbopower - spower1) * (spower1 / (scbopower + 0.000001)))
             link.setScboeu(LINK.ORIGIDX, (100 - abs(link.getScbo(Entity.PRF) - spref1)) * (spower1 + (link.getScbo(Entity.POW) - spower1) * (spower1 / (link.getScbo(Entity.POW) + 0.000001))))
-
+			
+			#!!! Possible Nesting Errors: (100 - ABS(X1-X2)) * (Y1 + (Y - Y1) * (Y1 / (Y + 0...1)))
             #set scboeu2 (100 - abs(scbopref - spref2)) * (spower2 + (scbopower - spower2) * (spower2 / (scbopower + 0.000001)))
             link.setScboeu(LINK.DESTIDX, (100 - abs(link.getScbo(Entity.PRF) - spref2)) * (spower2 + (link.getScbo(Entity.POW) - spower2) * (spower2 / (link.getScbo(Entity.POW) + 0.000001))))
 
@@ -289,39 +294,39 @@ class StakeholderLinkage:
             else:
                 #if [sown-pref] of end1 != [sown-pref] of end2 [
                 if orig.getSown(Entity.PRF) != dest.getSown(Entity.PRF):
-                #ask end1 [
-                #if count my-out-links with [cbolink? = ticks] = 0 and count my-in-links with [cbolink? = ticks] = 0 [
-                if len(self.getLinksFromNode(t,orig)) == 0 and len(self.getLinkstToNode(t,orig)) == 0:
-                    #set sturcbo? 1
-                    orig.setSturcbo(1)
-                    #set sown-pref [scbo-pref] of other-end
-                    orig.setSown(Entity.PRF, dest.getScbo(Entity.PRF))
+					#ask end1 [
+					#if count my-out-links with [cbolink? = ticks] = 0 and count my-in-links with [cbolink? = ticks] = 0 [
+					if len(self.getLinksFromNode(t,orig)) == 0 and len(self.getLinkstToNode(t,orig)) == 0:
+						#set sturcbo? 1
+						orig.setSturcbo(1)
+						#set sown-pref [scbo-pref] of other-end
+						orig.setSown(Entity.PRF, dest.getScbo(Entity.PRF))
 
-                    #set scbo-pref [scbo-pref] of other-end
-                    orig.setScbo(Entity.PRF, dest.getScbo(Entity.PRF))
+						#set scbo-pref [scbo-pref] of other-end
+						orig.setScbo(Entity.PRF, dest.getScbo(Entity.PRF))
 
-                    #set scbo-power 0
-                    orig.setScbo(Entity.POW,0)
+						#set scbo-power 0
+						orig.setScbo(Entity.POW,0)
 
-                    #set sown-eu (100 - abs (sown-pref - sown-pref)) * sown-power]]
-                    orig.setSown(Entity.EU, 100*orig.getSown(Entity.POW))
+						#set sown-eu (100 - abs (sown-pref - sown-pref)) * sown-power]]
+						orig.setSown(Entity.EU, 100*orig.getSown(Entity.POW))
 
-                #ask end2 [
-                #if count my-out-links with [cbolink? = ticks] = 0 and count my-in-links with [cbolink? = ticks] = 0 [
-                if len(self.getLinksFromNode(t,dest)) == 0 and len(self.getLinkstToNode(t,dest)) == 0:
-                    #set sturcbo? 1
-                    dest.setSturcbo(1)
-                    #set sown-pref [scbo-pref] of other-end
-                    dest.setSown(Entity.PRF, orig.getScbo(Entity.PRF))
+					#ask end2 [
+					#if count my-out-links with [cbolink? = ticks] = 0 and count my-in-links with [cbolink? = ticks] = 0 [
+					if len(self.getLinksFromNode(t,dest)) == 0 and len(self.getLinkstToNode(t,dest)) == 0:
+						#set sturcbo? 1
+						dest.setSturcbo(1)
+						#set sown-pref [scbo-pref] of other-end
+						dest.setSown(Entity.PRF, orig.getScbo(Entity.PRF))
 
-                    #set scbo-pref [scbo-pref] of other-end
-                    dest.setScbo(Entity.PRF, orig.getScbo(Entity.PRF))
+						#set scbo-pref [scbo-pref] of other-end
+						dest.setScbo(Entity.PRF, orig.getScbo(Entity.PRF))
 
-                    #set scbo-power 0
-                    dest.setScbo(Entity.POW,0)
+						#set scbo-power 0
+						dest.setScbo(Entity.POW,0)
 
-                    #set sown-eu (100 - abs (sown-pref - sown-pref)) * sown-power]]
-                    dest.setSown(Entity.EU, 100 * dest.getSown(Entity.POW))
+						#set sown-eu (100 - abs (sown-pref - sown-pref)) * sown-power]]
+						dest.setSown(Entity.EU, 100 * dest.getSown(Entity.POW))
 
     ##----------------------------------------------------------------------
     ## Name:
