@@ -27,6 +27,10 @@ class LINK:
         self.destnode = dest
         self.citlink = 0
         self.cbolink = 0
+        #PIKE no cboeu
+        #self.cboeu = 0
+        #PIKE no diffpref, set high since sloce agents are more likely they are to form cbo
+        #self.diffpref = 100000000.0
         self.hidden = True
 
     ### Standard Set Routines
@@ -34,6 +38,10 @@ class LINK:
     def setDestnode(self,x): self.destnode = x
     def setCitlink(self,x): self.citlink = x
     def setCbolink(self,x): self.cbolink = x
+    #PIKE no cboeu
+    #def setCboeu(self,x): self.cboeu = x
+    #PIKE no diffpref
+    #def setDiffpref(self, x): self.diffpref = x
     def setHidden(self,x): self.hidden = x
 
     ### Standard Get Routines
@@ -42,3 +50,7 @@ class LINK:
     def getDestnode(self):  return self.destnode
     def getCitlink(self): return self.citlink
     def getCbolink(self): return self.cbolink
+    #PIKE no cboeu
+    #def getCboeu(self): return self.cboeu
+    #PIKE no diffpref
+    #def getDiffpref(self,x): self.diffpref = x
