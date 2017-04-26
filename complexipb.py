@@ -5,15 +5,18 @@
 
 import random
 from cits import *
-from govts import *
+#PIKE govt is pulled from agent
+#from govts import *
 from link_cits import *
 from link_stakeholders import *
+from citslinkage import *
+from stakeholderlinkage import *
 
-global_tax = 0
-global_base = 0
-global_talkspan = 10
-global_govt_base_wealth = 0
-global_gov_ideo = 90
+global_tax = .018
+global_base = 0.685
+global_talkspan = 50
+global_govt_base_wealth = 5000
+global_gov_ideo = 10
 
 MAX_XCOR = 100
 MAX_YCOR = 100
@@ -25,24 +28,24 @@ class ComplexIPBModel:
     def __init__(self):
         self.price = 0
         self.supply = 0
-        self.maxprox = 0
+        self.maxprox = 0 # not needed vestigial code
         self.maxpower = 0
         self.centerX = int(MAX_XCOR/2)
         self.centerY = int(MAX_YCOR/2)
         self.CITSarr = CITS_Collection()
-        self.govts = Agent()
+        self.govts = Agent(100,0,0)
         self.linkcits = CITSLinkage(MAX_TICKS)
-        self.dlinkstkhldrs = StakeholderLinkage()
+        self.dlinkstkhldrs = StakeholderLinkage(MAX_TICKS)
         self.ticks = 0
 
     ##----------------------------------------------------------------------
-    ## Name:
+    ## Name: Setup
     ##
-    ## Desc:
+    ## Desc: Initializes model 
     ##
     ## Paramters:
-    ##    1)
-    ##    2)
+    ##    1) initnum - initial number of agents
+    ##    2) 
     ##    3)
     ##
     ## Returns: Nothing
@@ -55,7 +58,7 @@ class ComplexIPBModel:
         self.govts.setHidden(True)
 
         #create-cits initial-number
-        self.CITSarr.Initialize(initnum,max_x,max_y)
+        self.CITSarr.Initialize(initnum,MAX_XCOR,MAX_YCOR)
 
         #ask cits [ set satisfaction...]
         self.CITSarr.InitSatisfaction()
@@ -63,16 +66,21 @@ class ComplexIPBModel:
         #ask govts [ set wealth...]
         self.govts.setWealth((self.CITSarr.GetSum("wealth") * global_tax) + global_govt_base_wealth)
 
-        self.ticks()
+        self.ticks
 
     ##----------------------------------------------------------------------
-    ## Name:
+    ## Name: step
     ##
-    ## Desc:
+    ## Desc: steps through the key modules of the model -
+    ##       (1) Updates
+    ##       (2) CITS_TALK
+    ##       (3) Stalkeholder talk
+    ##       (4) Conflict
+    ##       (5) Update Plot
     ##
     ## Paramters:
-    ##    1)
-    ##    2)
+    ##    1) ticks- counter of how many times step method has run
+    ##    2) CITSarr.cits - list of agent (citizens) in model
     ##    3)
     ##
     ## Returns: Nothing
@@ -80,54 +88,62 @@ class ComplexIPBModel:
         if self.ticks >= MAX_TICKS or CONFLICT_FLAG:
             return -1
 
+        # PIKE removed first self, I believe it is ok but not sure
         #think this needs to only be called once... moved up from
-        self.linkcits.FormLinks(self,self.ticks,self.CITSarr)
+        print (self.CITSarr.cits)
+        self.linkcits.FormLinks(self.ticks,self.CITSarr)
 
         self.Update()
         self.CITS_Talk()
         self.StakeholderTalk()
-        self.Conflict()
-        self.UpdatePlot()
+        #self.Conflict()
+        #self.UpdatePlot()
 
         self.ticks += 1
 
     ##----------------------------------------------------------------------
-    ## Name:
+    ## Name: Update 
     ##
-    ## Desc:
+    ## Desc: 1st module in step function updates all agents (citizens and govt) wealth power and satisfication
+    ##       attributes, the main variables to determine population satisifaction towards the government and conflict onset
     ##
     ## Paramters:
-    ##    1)
-    ##    2)
-    ##    3)
+    ##    1) base - input, simulates base wealth of each citizen
+    ##    2) tax - input, simulates tax rate og govt to determines its wealth 
+    ##    3) gov_ideo - input, simulates governemtn ideology on a spectrum of 0 to 100
+    ##    4) maxpower - gets the maxpower of the citizne population 
+    ##    5) Getsum('wealth") calculates the wealth of the citizens to determine govt wealth
+    ##    6) govts.getWealth() calculates wealth of government
     ##
     ## Returns: Nothing
     def Update(self):
+        # Pike vestigial code --removed
         #set maxprox max [proximity] of cits
-        self.maxprox = self.CITSarr.getMax("proximity")
+        #self.maxprox = self.CITSarr.getMax("proximity")
 
         self.CITSarr.UpdateSatisfaction(global_base,global_tax,global_gov_ideo)
 
         #set maxpower max [rawpower] of cits
-        self.maxpower = self.CITSarr.getMax("rawpower")
+        #PIKE RUN DEBUG PRINT FOR THIS
+        self.maxpower = self.CITSarr.GetMax(self, "rawpower")
 
         #ask cits [...
         self.CITSarr.UpdatePower(self.maxpower)
 
         #ask govts [...
         #  set wealth ((sum ([wealth] of cits) * tax) + Government-Base-Wealth)
-        govts.setWealth( (self.CITSarr.GetSum("wealth") * global_tax) + global_govt_base_wealth )
-        govts.setPower( govts.getWealth() )
+        self.govts.setWealth( (self.CITSarr.GetSum("wealth") * global_tax) + global_govt_base_wealth )
+        self.govts.setPower( self.govts.getWealth() )
 
     ##----------------------------------------------------------------------
-    ## Name:
+    ## Name: CITS_Talk
     ##
-    ## Desc:
+    ## Desc: citizen agents conduct pairwise comparison of all agents in talkspan range to determine if they should form a cbo 
     ##
-    ## Paramters:
-    ##    1)
-    ##    2)
-    ##    3)
+    ## Parameters:
+    ##    1) ticks - number of times step method has been run
+    ##    2) CITSarr - citizen objects in list
+    ##    3) 
     ##
     ## Returns: Nothing
     def CITS_Talk(self):
@@ -146,15 +162,30 @@ class ComplexIPBModel:
         for t in range(self.ticks - 1):
             self.linkcits.ManagePreviousLink(t,self.CITSarr)
 
-        #ask cits with [stakeholder? = 1] [
-        self.linkcits.UpdateCITS(t,self.CITSarr))
+            #ask cits with [stakeholder? = 1] [
+            self.linkcits.UpdateCITS(t,self.CITSarr)
 
+
+    ##----------------------------------------------------------------------
+    ## Name: StakeholderTalk
+    ##
+    ## Desc: cbos talk and determine if they should form alliances
+    ##
+    ## Parameters:
+    ##    1) ticks - number of times step method has been run
+    ##    2) CITSarr - citizen objects in list
+    ##    3) 
+    ##
+    ## Returns: Nothing
 
 
     def StakeholderTalk(self):
 
-        pass
+        for c in self.CITSarr.cits: 
+            print (c)
+    
 
+    '''
     def Conflict(self):
         ask cits with [sturcbo? = 1] [
             if scbo-power >= sum [own-power] of cits with [sturcbo? != 1] * power-parity and
@@ -166,9 +197,14 @@ class ComplexIPBModel:
             ]
         ]
 
-
+    '''
 
 # In[ ]:
 
-
+if __name__ == '__main__':
+    
+    sim = ComplexIPBModel()
+    
+    sim.Setup(10)
+    sim.Step()
 

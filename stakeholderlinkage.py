@@ -56,7 +56,8 @@ class StakeholderLinkage:
     ##    3)
     ##
     ## Returns: Nothing
-    def UpdateSHolderLinks(self,cits):
+    ## PIKE added t to parameters
+    def UpdateSHolderLinks(self,t,cits):
         #ask cits with [stakeholder? = 1] [
         #  create-linkstakeholders-to cits with [stakeholder? = 1] with [who != [who] of myself]
         #  [
@@ -66,7 +67,8 @@ class StakeholderLinkage:
             dest = cits.getCITS( link.getDestnode() )
 
             # set cbolink? ticks
-            link.setCbolink(True)
+            # PIKE changed form True to t
+            link.setCbolink(t)
 
             # set spref1 [sown-pref] of end1
             pref1 = orig.getSown(Entity.PRF)
@@ -93,7 +95,7 @@ class StakeholderLinkage:
             link.setScbo(Entity.POW, spower1 + spower2)
 			
             #!!!set scboeu scbopower * (100 - abs (scbopref - scbopref))
-			link.setScbo(Entity.EU, link.getScbo(Entity.POW) * 100 )
+            link.setScbo(Entity.EU, link.getScbo(Entity.POW) * 100 )
 			
             # set scboeu1 (100 - abs(scbopref - spref1)) * (spower1 + (scbopower - spower1) * (spower1 / (scbopower + 0.000001)))
             link.setScboeu(LINK.ORIGIDX, (100 - abs(link.getScbo(Entity.PRF) - spref1)) * (spower1 + (link.getScbo(Entity.POW) - spower1) * (spower1 / (link.getScbo(Entity.POW) + 0.000001))))
@@ -104,6 +106,7 @@ class StakeholderLinkage:
 
             #ask end1 [
             #if empty? [scboeu1] of my-out-links with [cbolink? = 3][
+        
             if self.getLinksFromNode(t,orig) is None:
                 # set stemp-eu 0
                 orig.setTempEu(0)
@@ -148,12 +151,13 @@ class StakeholderLinkage:
                 self.removeLink(t,orig,dest)
 
             #if ([stemp-eu] of end1 > [sown-eu] of end1) and ([stemp-eu] of end2 > [sown-eu] of end2)
-            if orig.getStemp(Entity.EU) > orig.getSown(Entity.EU) and dest.getStemp(Entity.EU) > dest.getSown(Entity.EU)
+            if orig.getStemp(Entity.EU) > orig.getSown(Entity.EU) and dest.getStemp(Entity.EU) > dest.getSown(Entity.EU):
                 #ask end1 [
                 #set sturcbo? 1
                 orig.setTurcbo(1)
 
                 #!!! IS THIS CORRECT???
+                # PIKE Should be you are getting the max scbo preference of if your outlinks as the code is only set to make one link a tick 
                 maxval = self.getMaxOutlinks("scbopref")
                 #set sown-pref max [scbopref] of my-out-links with [cbolink? = ticks]
                 orig.setSown(Entity.PRF, maxval)
@@ -238,11 +242,11 @@ class StakeholderLinkage:
         #----------
         #ask linkstakeholders with [cbolink? < ticks] [
         for link in self.linkcits[t]:
-			#ask linkcits with [citlink? < ticks] [
-			orig = cits.getCITS( link.getOrignode() )
-			dest = cits.getCITS( link.getDestnode() )
+        			#ask linkcits with [citlink? < ticks] [
+            orig = cits.getCITS( link.getOrignode() )
+            dest = cits.getCITS( link.getDestnode() )
 
-			#set spref1 [sown-pref] of end1
+        			#set spref1 [sown-pref] of end1
             pref1 = orig.getSown(Entity.PRF)
             #set spower1 [sown-power] of end1
             spower1 = orig.getSown(Entity.POW)
@@ -294,39 +298,41 @@ class StakeholderLinkage:
             else:
                 #if [sown-pref] of end1 != [sown-pref] of end2 [
                 if orig.getSown(Entity.PRF) != dest.getSown(Entity.PRF):
-					#ask end1 [
-					#if count my-out-links with [cbolink? = ticks] = 0 and count my-in-links with [cbolink? = ticks] = 0 [
-					if len(self.getLinksFromNode(t,orig)) == 0 and len(self.getLinkstToNode(t,orig)) == 0:
-						#set sturcbo? 1
-						orig.setSturcbo(1)
-						#set sown-pref [scbo-pref] of other-end
-						orig.setSown(Entity.PRF, dest.getScbo(Entity.PRF))
-
-						#set scbo-pref [scbo-pref] of other-end
-						orig.setScbo(Entity.PRF, dest.getScbo(Entity.PRF))
-
-						#set scbo-power 0
-						orig.setScbo(Entity.POW,0)
-
-						#set sown-eu (100 - abs (sown-pref - sown-pref)) * sown-power]]
-						orig.setSown(Entity.EU, 100*orig.getSown(Entity.POW))
-
-					#ask end2 [
-					#if count my-out-links with [cbolink? = ticks] = 0 and count my-in-links with [cbolink? = ticks] = 0 [
-					if len(self.getLinksFromNode(t,dest)) == 0 and len(self.getLinkstToNode(t,dest)) == 0:
-						#set sturcbo? 1
-						dest.setSturcbo(1)
-						#set sown-pref [scbo-pref] of other-end
-						dest.setSown(Entity.PRF, orig.getScbo(Entity.PRF))
-
-						#set scbo-pref [scbo-pref] of other-end
-						dest.setScbo(Entity.PRF, orig.getScbo(Entity.PRF))
-
-						#set scbo-power 0
-						dest.setScbo(Entity.POW,0)
-
-						#set sown-eu (100 - abs (sown-pref - sown-pref)) * sown-power]]
-						dest.setSown(Entity.EU, 100 * dest.getSown(Entity.POW))
+    					#ask end1 [
+    					#if count my-out-links with [cbolink? = ticks] = 0 and count my-in-links with [cbolink? = ticks] = 0 [
+                        if len(self.getLinksFromNode(t,orig)) == 0 and len(self.getLinkstToNode(t,orig)) == 0:
+                            #set sturcbo? 1
+                            orig.setSturcbo(1)
+                            
+                            #get sown-pref [scbo-pref] of other-end
+                            orig.setSown(Entity.PRF, dest.getScbo(Entity.PRF))
+                            
+                            #set scbo-pref [scbo-pref] of other-end
+                            orig.setScbo(Entity.PRF, dest.getScbo(Entity.PRF))
+                            
+                            #set scbo-power 0
+                            orig.setScbo(Entity.POW,0)
+                            
+                            #set sown-eu (100 - abs (sown-pref - sown-pref)) * sown-power]]
+                            orig.setSown(Entity.EU, 100*orig.getSown(Entity.POW))
+                        
+                        #ask end2 [
+                        #if count my-out-links with [cbolink? = ticks] = 0 and count my-in-links with [cbolink? = ticks] = 0 [
+                        if len(self.getLinksFromNode(t,dest)) == 0 and len(self.getLinkstToNode(t,dest)) == 0:
+                            #set sturcbo? 1
+                            dest.setSturcbo(1)
+                            
+                            #set sown-pref [scbo-pref] of other-end
+                            dest.setSown(Entity.PRF, orig.getScbo(Entity.PRF))
+                            
+                            #set scbo-pref [scbo-pref] of other-end
+                            dest.setScbo(Entity.PRF, orig.getScbo(Entity.PRF))
+                            
+                            #set scbo power 0
+                            dest.setScbo(Entity.POW,0)
+                            
+                            #set sown-eu (100 - abs (sown-pref - sown-pref)) * sown-power]]
+                            dest.setSown(Entity.EU, 100 * dest.getSown(Entity.POW))
 
     ##----------------------------------------------------------------------
     ## Name:
@@ -350,10 +356,13 @@ class StakeholderLinkage:
             #                  sown-power * ((count my-out-links with [cbolink? > 0]) +
             #                  (count my-in-links with [cbolink? > 0]) - 1)]
             #
-            #ask cits with [stakeholder? = 1] [
-                if (count my-out-links with [cbolink? >= 1] = 0) and (count my-in-links with [cbolink? >= 1] = 0)
-                #      set sturcbo? 0
+            #ask cits with [stakeholder? = 1] [ if (count my-out-links with [cbolink? >= 1] = 0) and (count my-in-links with [cbolink? >= 1] = 0)
+                ## PIKE UPDATRED NEEDS PROOF
+                if len(self.getLinksFromNode(c)) == 0 and len(self.getLinkstToNode(c)) == 0:
+                    #      set sturcbo? 0
+                    c.sturcbo = False
                 #      set scbo-power 0
+                    c.setScbo(Entity.POW, 0)
         #end
 
     ##----------------------------------------------------------------------
@@ -403,7 +412,7 @@ class StakeholderLinkage:
     ##    3)
     ##
     ## Returns: Nothing
-    def removeLink(self,t,orig,dest)
+    def removeLink(self,t,orig,dest):
         self.dlinkcits[t][orig].remove(dest)
 
     ##----------------------------------------------------------------------
