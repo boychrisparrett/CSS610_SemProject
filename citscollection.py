@@ -13,14 +13,14 @@
 import random
 from cits import *
 from math import sqrt
-import numpy as np
+from statistics import median
 
-global_cit_ideo_mean = 10.0
-global_cit_ideo_sd = 0.2
-global_cit_wealth_mean = 10.0
-global_cit_wealth_sd = 0.2
+global_cit_ideo_mean = 96.0
+global_cit_ideo_sd = 12
+global_cit_wealth_mean = 6.0
+global_cit_wealth_sd = 13
 global_party_number = 1
-global_talkspan = 4
+global_talkspan = 10
 
 ##############################################################################
 ##############################################################################
@@ -121,7 +121,7 @@ class CITS_Collection:
             if c.getSelectorate(): c.setIdeo( gov_ideo * ideo_error)
 
             #if ideo >= 100 [set ideo 99]
-            if c.getIdeo() >= 100: m_i.setIdeo(99)
+            if c.getIdeo() >= 100: c.setIdeo(99)
 
             #if ideo <= 1 [set ideo 2]
             if c.getIdeo() <= 1: c.setIdeo(2)
@@ -161,13 +161,14 @@ class CITS_Collection:
 
 
     def GetMedian(self,fld):
-        med = 0.0
+        med = []
         if fld == "wealth":
-            for i in self.cits: med += i.getWealth()
+            for i in self.cits: 
+				med.append(i.getWealth())
         elif fld == "ideo":
-            for i in self.cits: med += i.getIdeo()
-            ### FIX... MEDIAN, NOT MEAN
-        return (med / len(self.cits))
+            for i in self.cits: 
+				med.append(i.getIdeo())
+        return int(median(med))
 
     def GetSum(self,fld):
         med = 0.0
@@ -177,7 +178,7 @@ class CITS_Collection:
             for i in self.cits: med += i.getIdeo()
         return med
 
-    def GetMax(self, marr, fld):
+    def GetMax(self, fld):
         mx = -1
         if fld == "proximity":
             for i in self.cits:

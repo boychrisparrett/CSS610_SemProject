@@ -25,13 +25,16 @@ class Entity:
         self.pref = 0
         self.power = 0
         self.own_eu = 0
+        
 
     def getEntity(self,x):
         if x == Entity.EU: return self.own_eu
         elif x == Entity.POW: return self.power
         elif x == Entity.PRF: return self.pref
 
+
     def setEntity(self,x,v):
         if x == Entity.EU: self.own_eu = v
         elif x == Entity.POW: self.power = v
         elif x == Entity.PRF: self.pref =v
+        

@@ -25,6 +25,7 @@ class LINK_CITS(LINK):
         LINK.__init__(self,orig,dest)
         self.intereu = 0
         self.tempeu = 0
+        #PIKE added 4th variable for diffpref
         self.cbo = Entity(0,0,0)
 
         ###################################################################
@@ -33,6 +34,7 @@ class LINK_CITS(LINK):
         self.power = [0,0]
         self.eu = [0,0]
         self.cboeu = [0,0]
+        #PIKE: changed needed ot be like the others
         self.diffpref = [0,0]
 
     ### Set/Get Inter/Temp Expected Utility
@@ -54,7 +56,7 @@ class LINK_CITS(LINK):
     def setPref(self,idx,x): self.pref[idx] = x
     def setPower(self,idx,x): self.power[idx] = x
     def setEu(self,idx,x): self.eu[idx] = x
-    def setDiffpref(self,idx,x): self.diffpref[idx] = x
+    def setDiffpref(self,idx, x): self.diffpref[idx] = x
 
     def getCboeu(self,idx): return self.cboeu[idx]
     def getPref(self,idx): return self.pref[idx]

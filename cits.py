@@ -6,7 +6,7 @@ class CITS(Agent):
         Agent.__init__(self,uid,x,y)
 
         #Customized
-        self.proximity = 0
+        self.proximity = 0 # not necessary vestigial attribute
         self.party = 0
         self.selectorate = False
         self.bought = False
