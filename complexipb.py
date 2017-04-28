@@ -1,12 +1,5 @@
-
-# coding: utf-8
-
-# In[3]:
-
 import random
 from cits import *
-#PIKE govt is pulled from agent
-#from govts import *
 from link_cits import *
 from link_stakeholders import *
 from citslinkage import *
@@ -18,8 +11,8 @@ global_talkspan = 50
 global_govt_base_wealth = 5000
 global_gov_ideo = 10
 
-MAX_XCOR = 100
-MAX_YCOR = 100
+MAX_XCOR = 101
+MAX_YCOR = 101
 MAX_TICKS = 24
 CONFLICT_FLAG = False
 
@@ -28,12 +21,12 @@ class ComplexIPBModel:
     def __init__(self):
         self.price = 0
         self.supply = 0
-        self.maxprox = 0 # not needed vestigial code
+        ##self.maxprox = 0 # not needed vestigial code
         self.maxpower = 0
         self.centerX = int(MAX_XCOR/2)
         self.centerY = int(MAX_YCOR/2)
         self.CITSarr = CITS_Collection()
-        self.govts = Agent(100,0,0)
+        self.govts = Agent(100,self.centerX,self.centerY) #According to the paper...
         self.linkcits = CITSLinkage(MAX_TICKS)
         self.dlinkstkhldrs = StakeholderLinkage(MAX_TICKS)
         self.ticks = 0
@@ -65,8 +58,9 @@ class ComplexIPBModel:
 
         #ask govts [ set wealth...]
         self.govts.setWealth((self.CITSarr.GetSum("wealth") * global_tax) + global_govt_base_wealth)
-
-        self.ticks
+		
+		#Reset Tick Counter to zero
+        self.ticks = 0
 
     ##----------------------------------------------------------------------
     ## Name: step
@@ -90,7 +84,7 @@ class ComplexIPBModel:
 
         # PIKE removed first self, I believe it is ok but not sure
         #think this needs to only be called once... moved up from
-        print (self.CITSarr.cits)
+        #print (self.CITSarr.cits)
         self.linkcits.FormLinks(self.ticks,self.CITSarr)
 
         self.Update()
@@ -152,7 +146,8 @@ class ComplexIPBModel:
         ##NL: create-linkcits-to cits in-radius talkspan with [who != [who] of myself]
         ## ^^^^ MOVED UP FOR EFFICIENCY ^^^^ ##
 
-        #!!! think this needs to only be called once... but in netlogo model, it gets called every iteration... results in many links.
+        #!!! think this needs to only be called once... but in netlogo model, it gets called 
+		#!!! every iteration... results in many links.
         self.linkcits.UpdateLinks(self.ticks,self.CITSarr)
 
         #ask linkcits with [citlink? = ticks]

@@ -12,7 +12,6 @@
 
 from link_cits import *
 from cits import *
-#from citslinkage import *
 
 ##############################################################################
 ##############################################################################
@@ -80,9 +79,8 @@ class CITSLinkage:
             #PIKE UPDATED TO PASS IN citizen versus citizne list 
             # FROM  orig = cits.getCITS( link.getOrignode() ) to  orig = cits.getCIT( link.getOrignode() )
             
-            orig = cits.getCIT(link.getOrignode() )
-            
-            dest = cits.getCIT( link.getDestnode() )
+            orig = cits.getCIT(link.getOrignode())
+            dest = cits.getCIT(link.getDestnode())
 
             ## Get the pref, power, and EU of Orig/end1
             #NL: set pref1 [own-pref] of end1
@@ -148,6 +146,7 @@ class CITSLinkage:
             link.setDiffpref(LINK.ORIGIDX, abs(link.getCbo(Entity.PRF) - pref1))
             print ("THINK IS DIFFPREF !:", link.getDiffpref(LINK.ORIGIDX))
             #NL: set diffpref2
+			#!!! THIS WILL FAIL>>> DIFFPREF REMOVED FROM LINK
             link.setDiffpref(LINK.DESTIDX, abs(link.getCbo(Entity.PRF) - pref2))
 
 
