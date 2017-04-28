@@ -207,11 +207,11 @@ class CITSLinkage:
                 self.linkcits[t].remove(link)
 
             #if cboeu1 < [own-eu] of end1 [die]
-            elif link.getCboeu(LINK_CITS.ORIGIDX) < orig.getOwn(Entity.E_EU):
+            elif link.getCboeu(LINK_CITS.ORIGIDX) < orig.getOwn(Entity.EU):
                 self.linkcits[t].remove(link)
 
             #if cboeu2 <= [own-eu] of end2 [die]
-            elif link.getCboeu(LINK_CITS.DESTIDX) < dest.getOwn(Entity.E_EU):
+            elif link.getCboeu(LINK_CITS.DESTIDX) < dest.getOwn(Entity.EU):
                 self.linkcits[t].remove(link)
 
             #if diffpref2 > [minpref] of end2 [die]
@@ -221,7 +221,7 @@ class CITSLinkage:
 
             # ifelse ([temp-eu] of end1 > [own-eu] of end1) and
             #        ([temp-eu] of end2 > [own-eu] of end2)
-            elif (orig.getTempEu() > orig.getOwn(Entity.EU)) and (dest.getTempEu() > dest.getOwn(Entity.EU)) :
+            elif (orig.getTemp_Eu() > orig.getOwn(Entity.EU)) and (dest.getTemp_Eu() > dest.getOwn(Entity.EU)) :
                 #ask end1 [
                 #set turcbo 2
                 orig.setTurcbo(2)
@@ -320,8 +320,8 @@ class CITSLinkage:
          
         for link in self.linkcits[t]:
             #ask linkcits with [citlink? < ticks] [
-            orig = cits.getCITS( link.getOrignode() )
-            dest = cits.getCITS( link.getDestnode() )
+            orig = cits.getCIT( link.getOrignode() )
+            dest = cits.getCIT( link.getDestnode() )
 
             #if [own-pref] of end1 != [own-pref] of end2 [
             if orig.getOwn(Entity.PRF) != dest.getOwn(Entity.PRF):
@@ -364,7 +364,7 @@ class CITSLinkage:
                 #################### PIKE skipped cboeu12 as not referenced later as in line 120 
                 
                 #if(cboeu1 < [own-eu] of end1) or (cboeu2 < [own-eu] of end2) [
-                if (link.getCboeu(LINK.ORIGIDX) < orig.getOwn(Entity.EU)) or (link.setCboeu(LINK.DESTIDX) < dest.getOwn(Entity.EU)):
+                if (link.getCboeu(LINK.ORIGIDX) < orig.getOwn(Entity.EU)) or (link.getCboeu(LINK.DESTIDX) < dest.getOwn(Entity.EU)):
                     #ask end1 [
                     #if count my-out-links with [citlink? = 2] = 0 and count my-in-links with [citlink? = 2] = 0 [
 
@@ -422,7 +422,7 @@ class CITSLinkage:
                     #ask end1
                     #ifelse count my-out-links with [citlink? = 2] = 0 and count my-in-links with [citlink? = 2] = 0 [
                     #!!! NOT SURE WHAT CITLINK? = 2 CONDITION IS OR WHERE IT IS SET
-                    if len(self.getLinksFromNode(t,orig)) == 0 and len(self.getLinkstToNode(t,orig)) == 0:
+                    if len(self.getLinksFromNode(t,orig)) == 0 and len(self.getLinksToNode(t,orig)) == 0:
                         #set turcbo 2
                         orig.setTurcbo(2)
 
@@ -448,7 +448,7 @@ class CITSLinkage:
                     #ifelse count my-out-links with [citlink? = 2] = 0 and count my-in-links with [citlink? = 2] = 0 [
                     #!!! NOT SURE WHAT CITLINK? = 2 CONDITION IS OR WHERE IT IS SET
                     ## PIKE think this should be if there is a link?
-                    if len(self.getLinksFromNode(t,dest)) == 0 and len(self.getLinkstToNode(t,dest)) == 0:
+                    if len(self.getLinksFromNode(t,dest)) == 0 and len(self.getLinksToNode(t,dest)) == 0:
                         #set turcbo 2
                         dest.setTurcbo(2)
 
@@ -470,7 +470,7 @@ class CITSLinkage:
                         #set stakeholder? 1
                         dest.setStakeholder(1)
                     #set hidden? FALSE
-                    self.linkcits[t].setHidden(False)
+                    #self.linkcits[t].setHidden(False)
 
     ##----------------------------------------------------------------------
     ## Name:
@@ -514,7 +514,7 @@ class CITSLinkage:
     ## Returns: Nothing
     def getLinksToNode(self,t,node):
         ret = []
-        for link in linkcits[t]:
+        for link in self.linkcits[t]:
             if node == link.getDestnode():
                 ret.append(link.getOrignode())
         return ret

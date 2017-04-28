@@ -1,4 +1,5 @@
 import random
+from citscollection import *
 from cits import *
 from link_cits import *
 from link_stakeholders import *
@@ -30,6 +31,10 @@ class ComplexIPBModel:
         self.linkcits = CITSLinkage(MAX_TICKS)
         self.dlinkstkhldrs = StakeholderLinkage(MAX_TICKS)
         self.ticks = 0
+        
+        ##DEBUG PURPOSES ONLY
+        self.outfile = ""
+        
 
     ##----------------------------------------------------------------------
     ## Name: Setup
@@ -61,6 +66,10 @@ class ComplexIPBModel:
 
         #Reset Tick Counter to zero
         self.ticks = 0
+        
+        self.outfile = open("CITS_OUT.csv",'w')
+        self.outfile.write("Time,CITS,Ideo,Power,Wealth,SHldr,Satisfy,CBOPOW,CBOPRF,CBOEU,OwnPOW,OwnPRF,OwnEU\n")
+
 
     ##----------------------------------------------------------------------
     ## Name: step
@@ -119,7 +128,7 @@ class ComplexIPBModel:
 
         #set maxpower max [rawpower] of cits
         #PIKE RUN DEBUG PRINT FOR THIS
-        self.maxpower = self.CITSarr.GetMax(self, "rawpower")
+        self.maxpower = self.CITSarr.GetMax("rawpower")
 
         #ask cits [...
         self.CITSarr.UpdatePower(self.maxpower)
@@ -147,7 +156,7 @@ class ComplexIPBModel:
         ## ^^^^ MOVED UP FOR EFFICIENCY ^^^^ ##
 
         #!!! think this needs to only be called once... but in netlogo model, it gets called 
-		#!!! every iteration... results in many links.
+        #!!! every iteration... results in many links.
         self.linkcits.UpdateLinks(self.ticks,self.CITSarr)
 
         #ask linkcits with [citlink? = ticks]
@@ -158,7 +167,7 @@ class ComplexIPBModel:
             self.linkcits.ManagePreviousLink(t,self.CITSarr)
 
             #ask cits with [stakeholder? = 1] [
-            self.linkcits.UpdateCITS(t,self.CITSarr)
+            self.linkcits.UpdateCITS(self.CITSarr.getCITS())
 
 
     ##----------------------------------------------------------------------
@@ -175,11 +184,32 @@ class ComplexIPBModel:
 
 
     def StakeholderTalk(self):
-
+        print(self.CITSarr.getNumCITS())
+        outstr=""
         for c in self.CITSarr.cits: 
-            print (c)
-    
-
+            print("CITS#: %s at (%s,%s)"%(c.getUID(),c.getXCor(),c.getYCor()))
+            outstr="%s,%s,%s,%s,"%(self.ticks,c.getUID(),c.getXCor(),c.getYCor())
+            print("\t  Ideo:",c.getIdeo())
+            outstr="%s,%s"%(outstr,c.getIdeo())
+            print("\t Power:",c.getPower())
+            outstr="%s,%s"%(outstr,c.getPower())
+            print("\tWealth:",c.getWealth())
+            outstr="%s,%s"%(outstr,c.getWealth())
+            print("\t SHldr:",c.getStakeholder())
+            outstr="%s,%s"%(outstr,c.getStakeholder())
+            print("\tSatisfy:",c.getSatisfaction())
+            outstr="%s,%s"%(outstr,c.getSatisfaction())
+            print("\tCBO:")
+            print("\t\t POW:",c.getCbo(Entity.POW))
+            print("\t\t PRF:",c.getCbo(Entity.PRF))
+            print("\t\t  EU:",c.getCbo(Entity.EU))
+            outstr="%s,%s,%s,%s,"%(outstr,c.getCbo(Entity.POW),c.getCbo(Entity.PRF),c.getCbo(Entity.EU))
+            print("\tOwn:")
+            print("\t\t POW:",c.getOwn(Entity.POW))
+            print("\t\t PRF:",c.getOwn(Entity.PRF))
+            print("\t\t  EU:",c.getOwn(Entity.EU))
+            outstr="%s,%s,%s,%s\n"%(outstr,c.getOwn(Entity.POW),c.getOwn(Entity.PRF),c.getOwn(Entity.EU))
+            self.outfile.write(outstr)
     '''
     def Conflict(self):
         ask cits with [sturcbo? = 1] [
@@ -194,12 +224,14 @@ class ComplexIPBModel:
 
     '''
 
-# In[ ]:
 
 if __name__ == '__main__':
     
     sim = ComplexIPBModel()
     
     sim.Setup(10)
-    sim.Step()
-
+    for i in range(MAX_TICKS):
+        sim.Step()
+        print("####################################################################")
+        print("####################################################################")
+    sim.outfile.close()
