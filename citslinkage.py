@@ -200,8 +200,8 @@ class CITSLinkage:
     #  ask linkcits with [citlink? = ticks] [
     def ManageCurrentLink(self,t,cits):
         for link in self.linkcits[t]:
-            orig = cits.getCITS( link.getOrignode() )
-            dest = cits.getCITS( link.getDestnode() )
+            orig = cits.getCIT( link.getOrignode() )
+            dest = cits.getCIT( link.getDestnode() )
             #if cboeu1 < [temp-eu] of end1 [die]
             if link.getCboeu(LINK_CITS.ORIGIDX) < orig.getTemp_Eu():
                 self.linkcits[t].remove(link)

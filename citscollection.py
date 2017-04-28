@@ -72,6 +72,7 @@ class CITS_Collection:
             yarr.remove(iy)
 
             c = CITS(i,ix,iy)
+            print("CITS #%s created at %s %s"%(i,ix,iy))
             c.setStakeholder(False)
             c.setParty(random.randint(0,global_party_number))
 
@@ -86,7 +87,8 @@ class CITS_Collection:
 
             #set wealth random-normal cit_wealth_mean cit_wealth_sd
             c.setWealth(random.normalvariate(global_cit_wealth_mean,global_cit_wealth_sd))
-
+            print("\twith wealth = %s"%c.getWealth())
+            
             if c.getSelectorate():
                 c.setWealth( c.getWealth() * 1.1)
 
@@ -164,10 +166,10 @@ class CITS_Collection:
         med = []
         if fld == "wealth":
             for i in self.cits: 
-				med.append(i.getWealth())
+                med.append(i.getWealth())
         elif fld == "ideo":
             for i in self.cits: 
-				med.append(i.getIdeo())
+                med.append(i.getIdeo())
         return int(median(med))
 
     def GetSum(self,fld):

@@ -58,8 +58,8 @@ class ComplexIPBModel:
 
         #ask govts [ set wealth...]
         self.govts.setWealth((self.CITSarr.GetSum("wealth") * global_tax) + global_govt_base_wealth)
-		
-		#Reset Tick Counter to zero
+
+        #Reset Tick Counter to zero
         self.ticks = 0
 
     ##----------------------------------------------------------------------
