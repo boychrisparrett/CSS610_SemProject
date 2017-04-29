@@ -1,6 +1,7 @@
 ##############################################################################
-# Author: Christopher M. Parrett
-# Homework #2, due 08FEB2017
+# Authors: Christopher M. Parrett, Tom Pike
+# Term Project - Complex Intelligence Preparation of the Battlefield
+#
 # Computational Social Science 610: Agent Based Modeling and Simulation
 # Spring 2017, Department of Computational and Data Sciences,
 # Under the most excellent tutelage of Dr. R Axtell, George Mason Univ
@@ -9,7 +10,6 @@
 # using Python 3.5.2 | Anaconda 4.2.0 (64-bit).
 ##############################################################################
 ##############################################################################
-
 from entity import *
 from link import *
 
@@ -17,10 +17,20 @@ from link import *
 ##############################################################################
 # CLASS::LINK_CITS extends Class::LINK
 #
-# Purpose:
-#
+# Purpose: Implements the collection of directed CITS links
 #
 class LINK_CITS(LINK):
+
+    ##----------------------------------------------------------------------
+    ## Name: __init__
+    ##
+    ## Desc: standard initializer, derived from LINK_CITS
+    ##
+    ## Paramters:
+    ##    1) orig: originator node
+    ##    2) dest: destination node
+    ##
+    ## Returns: Nothing
     def __init__(self,orig,dest):
         LINK.__init__(self,orig,dest)
         self.intereu = 0
@@ -37,6 +47,7 @@ class LINK_CITS(LINK):
         #PIKE: changed needed ot be like the others
         self.diffpref = [0,0]
 
+    ###################################################################
     ### Set/Get Inter/Temp Expected Utility
     def setIntereu(self,x): self.intereu = x
     def getIntereu(self): return self.intereu
@@ -44,6 +55,7 @@ class LINK_CITS(LINK):
     def setTempEu(self,x): self.tempeu = 0
     def getTempEu(self): return self.tempeu
 
+    ###################################################################
     ### Set/Get CBO Expected Utility (EU) / Power (POW) / Pref (PRF)
     def setCbo(self,x,v): self.cbo.setEntity(x,v)
     def getCbo(self,x): return self.cbo.getEntity(x)
