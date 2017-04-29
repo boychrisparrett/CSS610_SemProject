@@ -1,6 +1,7 @@
 ##############################################################################
-# Author: Christopher M. Parrett
-# Homework #2, due 08FEB2017
+# Authors: Christopher M. Parrett, Tom Pike
+# Term Project - Complex Intelligence Preparation of the Battlefield
+#
 # Computational Social Science 610: Agent Based Modeling and Simulation
 # Spring 2017, Department of Computational and Data Sciences,
 # Under the most excellent tutelage of Dr. R Axtell, George Mason Univ
@@ -9,29 +10,31 @@
 # using Python 3.5.2 | Anaconda 4.2.0 (64-bit).
 ##############################################################################
 ##############################################################################
-
 from link_cits import *
 from cits import *
 
 ##############################################################################
 ##############################################################################
-# CLASS::
+# CLASS::StakeholderLinkage
 #
-# Purpose:
-#
+# Purpose: Implements the maintenance of the array/collection of Stakeholder 
+#          Links
 #
 class StakeholderLinkage:
+  
+    ########################################################################
+    ## Standard initialization routine
     def __init__(self,max_t):
         self.linkshldrs = {}
+       
     ##----------------------------------------------------------------------
-    ## Name:
+    ## Name: FormLinks
     ##
     ## Desc:
     ##
     ## Paramters:
-    ##    1)
-    ##    2)
-    ##    3)
+    ##    1) t: time in ticks
+    ##    2) cits: the array of cits
     ##
     ## Returns: Nothing
     def FormLinks(self,t,cits):
@@ -40,20 +43,23 @@ class StakeholderLinkage:
             #get nodes UIDs within range of ci
             ret = ci.NodesWithinRange()
             for l in range(len(ret)):
-               links.append( LINK_STAKEHOLDERS(ci,ret[l]) )
-               links[l].setHidden(True)
+                #!!! QUESTION: Should we check to see if both are stakeholders?
+                #form links
+                links.append( LINK_STAKEHOLDERS(ci,ret[l]) )
+                links[l].setHidden(True)
+                
+        #Assign all links to array at time t    
         self.linkshldrs[t] = links
 
-#to stakeholder-talk
+    
     ##----------------------------------------------------------------------
-    ## Name:
+    ## Name: UpdateSHolderLinks
     ##
     ## Desc:
     ##
     ## Paramters:
-    ##    1)
-    ##    2)
-    ##    3)
+    ##    1) t: time in ticks
+    ##    2) cits: the array of cits
     ##
     ## Returns: Nothing
     ## PIKE added t to parameters
@@ -93,10 +99,10 @@ class StakeholderLinkage:
 
             # set scbopower spower1 + spower2
             link.setScbo(Entity.POW, spower1 + spower2)
-			
+
             #!!!set scboeu scbopower * (100 - abs (scbopref - scbopref))
             link.setScbo(Entity.EU, link.getScbo(Entity.POW) * 100 )
-			
+
             # set scboeu1 (100 - abs(scbopref - spref1)) * (spower1 + (scbopower - spower1) * (spower1 / (scbopower + 0.000001)))
             link.setScboeu(LINK.ORIGIDX, (100 - abs(link.getScbo(Entity.PRF) - spref1)) * (spower1 + (link.getScbo(Entity.POW) - spower1) * (spower1 / (link.getScbo(Entity.POW) + 0.000001))))
 
@@ -127,14 +133,13 @@ class StakeholderLinkage:
         #]//End ask cits
 
     ##----------------------------------------------------------------------
-    ## Name:
+    ## Name: ManageCurrentLink
     ##
     ## Desc:
     ##
     ## Paramters:
-    ##    1)
-    ##    2)
-    ##    3)
+    ##    1) t: time in ticks
+    ##    2) cits: the array of cits
     ##
     ## Returns: Nothing
     #  ask linkcits with [citlink? = ticks] [
@@ -227,14 +232,13 @@ class StakeholderLinkage:
                 #set sown-power sown-power
 
     ##----------------------------------------------------------------------
-    ## Name:
+    ## Name: ManagePreviousLink
     ##
     ## Desc:
     ##
     ## Paramters:
-    ##    1)
-    ##    2)
-    ##    3)
+    ##    1) t: time in ticks
+    ##    2) cits: the array of cits
     ##
     ## Returns: Nothing
     # ask linkcits with [citlink? < ticks] [
@@ -242,17 +246,17 @@ class StakeholderLinkage:
         #----------
         #ask linkstakeholders with [cbolink? < ticks] [
         for link in self.linkcits[t]:
-        			#ask linkcits with [citlink? < ticks] [
+        #ask linkcits with [citlink? < ticks] [
             orig = cits.getCITS( link.getOrignode() )
             dest = cits.getCITS( link.getDestnode() )
 
-        			#set spref1 [sown-pref] of end1
+            #set spref1 [sown-pref] of end1
             pref1 = orig.getSown(Entity.PRF)
             #set spower1 [sown-power] of end1
             spower1 = orig.getSown(Entity.POW)
             #set seu1 [sown-eu] of end1
             seu1 = orig.getSown(Entity.EU)
-			
+
             #set spref2 [sown-pref] of end2
             spref2 = dest.getSown(Entity.PRF)
             #set spower2 [sown-power] of end2
@@ -269,11 +273,11 @@ class StakeholderLinkage:
             #;;set scboeu scbopower * (100 - abs (scbopref - scbopref))
             link.setScbo(Entity.EU, (spower1 + spower2) * 100)
 
-			#!!! Possible Nesting Errors: (100 - ABS(X1-X2)) * (Y1 + (Y - Y1) * (Y1 / (Y + 0...1)))
+            #!!! Possible Nesting Errors: (100 - ABS(X1-X2)) * (Y1 + (Y - Y1) * (Y1 / (Y + 0...1)))
             #set scboeu1 (100 - abs(scbopref - spref1)) * (spower1 + (scbopower - spower1) * (spower1 / (scbopower + 0.000001)))
             link.setScboeu(LINK.ORIGIDX, (100 - abs(link.getScbo(Entity.PRF) - spref1)) * (spower1 + (link.getScbo(Entity.POW) - spower1) * (spower1 / (link.getScbo(Entity.POW) + 0.000001))))
-			
-			#!!! Possible Nesting Errors: (100 - ABS(X1-X2)) * (Y1 + (Y - Y1) * (Y1 / (Y + 0...1)))
+
+            #!!! Possible Nesting Errors: (100 - ABS(X1-X2)) * (Y1 + (Y - Y1) * (Y1 / (Y + 0...1)))
             #set scboeu2 (100 - abs(scbopref - spref2)) * (spower2 + (scbopower - spower2) * (spower2 / (scbopower + 0.000001)))
             link.setScboeu(LINK.DESTIDX, (100 - abs(link.getScbo(Entity.PRF) - spref2)) * (spower2 + (link.getScbo(Entity.POW) - spower2) * (spower2 / (link.getScbo(Entity.POW) + 0.000001))))
 
@@ -298,8 +302,8 @@ class StakeholderLinkage:
             else:
                 #if [sown-pref] of end1 != [sown-pref] of end2 [
                 if orig.getSown(Entity.PRF) != dest.getSown(Entity.PRF):
-    					#ask end1 [
-    					#if count my-out-links with [cbolink? = ticks] = 0 and count my-in-links with [cbolink? = ticks] = 0 [
+                        #ask end1 [
+                        #if count my-out-links with [cbolink? = ticks] = 0 and count my-in-links with [cbolink? = ticks] = 0 [
                         if len(self.getLinksFromNode(t,orig)) == 0 and len(self.getLinkstToNode(t,orig)) == 0:
                             #set sturcbo? 1
                             orig.setSturcbo(1)
@@ -335,14 +339,13 @@ class StakeholderLinkage:
                             dest.setSown(Entity.EU, 100 * dest.getSown(Entity.POW))
 
     ##----------------------------------------------------------------------
-    ## Name:
+    ## Name: UpdateSholdrCITS
     ##
     ## Desc:
     ##
     ## Paramters:
-    ##    1)
-    ##    2)
-    ##    3)
+    ##    1) t: time in ticks
+    ##    2) cits: the array of cits
     ##
     ## Returns: Nothing
     def UpdateSholdrCITS(self,cits):
@@ -359,23 +362,23 @@ class StakeholderLinkage:
             #ask cits with [stakeholder? = 1] [ if (count my-out-links with [cbolink? >= 1] = 0) and (count my-in-links with [cbolink? >= 1] = 0)
                 ## PIKE UPDATRED NEEDS PROOF
                 if len(self.getLinksFromNode(c)) == 0 and len(self.getLinkstToNode(c)) == 0:
-                    #      set sturcbo? 0
+                    #set sturcbo? 0
                     c.sturcbo = False
-                #      set scbo-power 0
+                    
+                    #set scbo-power 0
                     c.setScbo(Entity.POW, 0)
         #end
 
     ##----------------------------------------------------------------------
-    ## Name:
+    ## Name: getLinksToNode
     ##
-    ## Desc:
+    ## Desc: Find all in-coming links to a node
     ##
     ## Paramters:
-    ##    1)
-    ##    2)
-    ##    3)
+    ##    1) t: time
+    ##    2) node: agent UID
     ##
-    ## Returns: Nothing
+    ## Returns: array of agent UIDs 
     def getLinksToNode(self,t,node):
         ret = []
         for link in linkcits[t]:
@@ -384,16 +387,15 @@ class StakeholderLinkage:
         return ret
 
     ##----------------------------------------------------------------------
-    ## Name:
+    ## Name: getLinksToNode
     ##
-    ## Desc:
+    ## Desc: Find all out-going links from a node
     ##
     ## Paramters:
-    ##    1)
-    ##    2)
-    ##    3)
+    ##    1) t: time
+    ##    2) node: agent UID
     ##
-    ## Returns: Nothing
+    ## Returns: array of agent UIDs 
     def getLinksFromNode(self,t,node):
         ret = []
         for link in linkcits[t]:
@@ -402,14 +404,14 @@ class StakeholderLinkage:
         return ret
 
     ##----------------------------------------------------------------------
-    ## Name:
+    ## Name: removeLink
     ##
     ## Desc:
     ##
     ## Paramters:
-    ##    1)
-    ##    2)
-    ##    3)
+    ##    1) t: time in ticks
+    ##    2) orig: originator node UID
+    ##    3) dest: destination node UID
     ##
     ## Returns: Nothing
     def removeLink(self,t,orig,dest):
@@ -421,9 +423,9 @@ class StakeholderLinkage:
     ## Desc:
     ##
     ## Paramters:
-    ##    1)
-    ##    2)
-    ##    3)
+    ##    1) t: time in ticks
+    ##    2) node:
+    ##    3) param:
     ##
     ## Returns: Nothing
     def getCurrentMaxOutlinks(self, t, node, param):
@@ -439,9 +441,9 @@ class StakeholderLinkage:
     ## Desc:
     ##
     ## Paramters:
-    ##    1)
-    ##    2)
-    ##    3)
+    ##    1) t: time in ticks
+    ##    2) node:
+    ##    3) param:
     ##
     ## Returns: Nothing
     def getCurrentMaxInlinks(self, t, node, param):
@@ -457,9 +459,9 @@ class StakeholderLinkage:
     ## Desc:
     ##
     ## Paramters:
-    ##    1)
-    ##    2)
-    ##    3)
+    ##    1) t: time in ticks
+    ##    2) node:
+    ##    3) param:
     ##
     ## Returns: Nothing
     def getCurrentMinOutlinks(self, t, node, param):
@@ -475,9 +477,9 @@ class StakeholderLinkage:
     ## Desc:
     ##
     ## Paramters:
-    ##    1)
-    ##    2)
-    ##    3)
+    ##    1) t: time in ticks
+    ##    2) node:
+    ##    3) param:
     ##
     ## Returns: Nothing
     def getCurrentMinInlinks(self, t, node, param):
