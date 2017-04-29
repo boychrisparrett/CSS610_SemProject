@@ -1,7 +1,37 @@
+##############################################################################
+# Authors: Christopher M. Parrett, Tom Pike
+# Term Project - Complex Intelligence Preparation of the Battlefield
+#
+# Computational Social Science 610: Agent Based Modeling and Simulation
+# Spring 2017, Department of Computational and Data Sciences,
+# Under the most excellent tutelage of Dr. R Axtell, George Mason Univ
+#
+# Developed on a Windows 10 platform, AMD PhenomII X6 3.3GHz w/ 8GB RAM
+# using Python 3.5.2 | Anaconda 4.2.0 (64-bit).
+##############################################################################
+##############################################################################
 from entity import *
 from agent import *
 
+#############################################################################
+##############################################################################
+# CLASS::CITS (derived from Agent)
+#
+# Purpose: Implements the breed CITS 
+#
 class CITS(Agent):
+    
+    ##----------------------------------------------------------------------
+    ## Name: __init__
+    ##
+    ## Desc: Standard initialization routine, derived from Class AGENT.
+    ##
+    ## Paramters:
+    ##    1) uid: Unique Identifier of the object
+    ##    2) x: X-Coordinate of the agent in cartesian space
+    ##    3) y: Y-Coordinate of the agent in cartesian space    
+    ##
+    ## Returns: Nothing
     def __init__(self,uid,x,y):
         Agent.__init__(self,uid,x,y)
 
@@ -32,6 +62,8 @@ class CITS(Agent):
         #SCBO VARIABLE GROUP
         self.scbo = Entity(0,0,0)
 
+    #####################################################################
+    ## Standard Set Routines, with x = value
     def setProximity(self,x): self.proximity = x
     def setParty(self,x):  self.party = x
     def setSelectorate(self,x):  self.selectorate = x
@@ -46,6 +78,8 @@ class CITS(Agent):
     def setStemp_Eu(self,x): self.stemp_eu = x
     def setSturcbo(self,x): self.sturcbo = x
 
+    #####################################################################
+    ## Standard Get Routines
     def getProximity(self): return self.proximity
     def getParty(self): return self.party
     def getSelectorate(self): return self.selectorate
@@ -60,11 +94,16 @@ class CITS(Agent):
     def getStemp_Eu(self): return self.stemp_eu
     def getSturcbo(self): return self.sturcbo
 
+    #####################################################################
+    ## Generalized Get Routines using ENTITY class, with x = element
     def getOwn(self,x): return self.own.getEntity(x)
     def getSown(self,x): return self.sown.getEntity(x)
     def getCbo(self,x): return self.cbo.getEntity(x)
     def getScbo(self,x): return self.scbo.getEntity(x)
 
+    #####################################################################
+    ## Generalized Set Routines using ENTITY class, with x = element and
+    ## v = the value to be stored
     def setOwn(self,x,v): self.own.setEntity(x,v)
     def setSown(self,x,v): self.sown.setEntity(x,v)
     def setCbo(self,x,v): self.cbo.setEntity(x,v)
