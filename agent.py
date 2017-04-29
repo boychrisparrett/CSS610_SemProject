@@ -1,5 +1,6 @@
 ##############################################################################
-# Author: Christopher M. Parrett
+# Authors: Christopher M. Parrett, Tom Pike
+# Term Project - Complex Intelligence Preparation of the Battlefield
 #
 # Computational Social Science 610: Agent Based Modeling and Simulation
 # Spring 2017, Department of Computational and Data Sciences,
@@ -18,6 +19,18 @@
 #
 #
 class Agent:
+ 
+    ##----------------------------------------------------------------------
+    ## Name: __init__
+    ##
+    ## Desc: Standard initialization routine of Class AGENT
+    ##
+    ## Paramters:
+    ##    1) uid: Unique Identifier of the object
+    ##    2) x: X-Coordinate of the agent in cartesian space
+    ##    3) y: Y-Coordinate of the agent in cartesian space
+    ##
+    ## Returns: Nothing
     def __init__(self,uid,x,y):
         self.UID = uid
         self.color = "#FFFFFF" #White
