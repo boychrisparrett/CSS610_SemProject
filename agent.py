@@ -54,6 +54,7 @@ class Agent:
     def setXCor(self,x): self.xcor = x
     def setYCor(self,x): self.ycor = x
     def setHidden(self,x): self.hidden = x
+    def setShape(self,x): self.shape =x
 
     #####################################################################
     ## Standard Get Routines
@@ -66,3 +67,4 @@ class Agent:
     def getXCor(self): return self.xcor
     def getYCor(self): return self.ycor
     def getHidden(self): return self.hidden
+    def getShape(self): return self.shape

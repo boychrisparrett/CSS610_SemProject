@@ -10,7 +10,7 @@
 # using Python 3.5.2 | Anaconda 4.2.0 (64-bit).
 ##############################################################################
 ##############################################################################
-from link_cits import *
+from link_stakeholders import *
 from cits import *
 
 ##############################################################################
@@ -39,14 +39,18 @@ class StakeholderLinkage:
     ## Returns: Nothing
     def FormLinks(self,t,cits):
         links = []
-        for ci in cits:
-            #get nodes UIDs within range of ci
-            ret = ci.NodesWithinRange()
-            for l in range(len(ret)):
-                #!!! QUESTION: Should we check to see if both are stakeholders?
+        for ci in cits.cits:
+            #check if ci is stakeholder
+            if ci.stakeholder == False: 
+                pass
+            else: #get nodes UIDs within range of ci
+                ret = cits.NodesWithinRange(ci)
+                for l in range(len(ret)):
+                #Check to see if l is stakeholder
                 #form links
-                links.append( LINK_STAKEHOLDERS(ci,ret[l]) )
-                links[l].setHidden(True)
+                    if l.stakeholder == True:
+                        links.append(LINK_STAKEHOLDERS(ci.UID,ret[l]) )
+                        links[l].setHidden(True)
                 
         #Assign all links to array at time t    
         self.linkshldrs[t] = links
@@ -146,7 +150,9 @@ class StakeholderLinkage:
     def ManageCurrentLink(self,t,cits):
         #ask linkstakeholders with [cbolink? = ticks] [
 
-        for link in self.linkcits[t]:
+        #changes to linksholders from link cits
+        
+        for link in self.linkshldrs[t]:
             orig = cits.getCITS( link.getOrignode() )
             dest = cits.getCITS( link.getDestnode() )
 
@@ -245,7 +251,8 @@ class StakeholderLinkage:
     def ManagePreviousLink(self, t, cits):
         #----------
         #ask linkstakeholders with [cbolink? < ticks] [
-        for link in self.linkcits[t]:
+        #chagnes to linksholders
+        for link in self.linkshldrs[t]:
         #ask linkcits with [citlink? < ticks] [
             orig = cits.getCITS( link.getOrignode() )
             dest = cits.getCITS( link.getDestnode() )
@@ -348,7 +355,7 @@ class StakeholderLinkage:
     ##    2) cits: the array of cits
     ##
     ## Returns: Nothing
-    def UpdateSholdrCITS(self,cits):
+    def UpdateSholdrCITS(self,t, cits):
         #-----------------
         #ask cits ...
         for c in cits:

@@ -8,9 +8,11 @@ from stakeholderlinkage import *
 
 global_tax = .018
 global_base = 0.685
-global_talkspan = 50
+global_talkspan = 70
 global_govt_base_wealth = 5000
 global_gov_ideo = 10
+global_power_parity = .11
+global_threshold = 29
 
 MAX_XCOR = 101
 MAX_YCOR = 101
@@ -27,7 +29,7 @@ class ComplexIPBModel:
         self.centerX = int(MAX_XCOR/2)
         self.centerY = int(MAX_YCOR/2)
         self.CITSarr = CITS_Collection()
-        self.govts = Agent(100,self.centerX,self.centerY) #According to the paper...
+        self.govts = Agent(10001,self.centerX,self.centerY) #According to the paper...
         self.linkcits = CITSLinkage(MAX_TICKS)
         self.dlinkstkhldrs = StakeholderLinkage(MAX_TICKS)
         self.ticks = 0
@@ -94,14 +96,21 @@ class ComplexIPBModel:
         # PIKE removed first self, I believe it is ok but not sure
         #think this needs to only be called once... moved up from
         #print (self.CITSarr.cits)
+        print ('STEP 1')
         self.linkcits.FormLinks(self.ticks,self.CITSarr)
-
+        print ('step 2')
         self.Update()
+        print ('step 3')
         self.CITS_Talk()
+        print ('step 4')
+        #repeat process at stakeholder level
+        self.dlinkstkhldrs.FormLinks(self.ticks, self.CITSarr)
+        print ('Step 5')
         self.StakeholderTalk()
         #self.Conflict()
         #self.UpdatePlot()
-
+        self.Conflict()
+        
         self.ticks += 1
 
     ##----------------------------------------------------------------------
@@ -123,7 +132,7 @@ class ComplexIPBModel:
         # Pike vestigial code --removed
         #set maxprox max [proximity] of cits
         #self.maxprox = self.CITSarr.getMax("proximity")
-
+       
         self.CITSarr.UpdateSatisfaction(global_base,global_tax,global_gov_ideo)
 
         #set maxpower max [rawpower] of cits
@@ -167,7 +176,7 @@ class ComplexIPBModel:
             self.linkcits.ManagePreviousLink(t,self.CITSarr)
 
             #ask cits with [stakeholder? = 1] [
-            self.linkcits.UpdateCITS(self.CITSarr.getCITS())
+            self.linkcits.UpdateCITS(t, self.CITSarr.getCITS())
 
 
     ##----------------------------------------------------------------------
@@ -184,53 +193,82 @@ class ComplexIPBModel:
 
 
     def StakeholderTalk(self):
-        print(self.CITSarr.getNumCITS())
+        #print(self.CITSarr.getNumCITS())
+        
+        
+        #repeat process at stakeholder level- moved in function to ensure stakeholder condition
+        self.dlinkstkhldrs.UpdateSHolderLinks(self.ticks, self.CITSarr)
+        
+        self.dlinkstkhldrs.ManageCurrentLink(self.ticks, self.CITSarr)        
+        
+        for t in range(self.ticks -1):
+            self.dlinkstkhldrs.ManagePreviousLink(t,self.CITSarr)
+            
+            self.dlinkstkhldrs.UpdateSholdrCITS(t, self.CITSarr.getCITS())
+        
+        
         outstr=""
-        for c in self.CITSarr.cits: 
-            print("CITS#: %s at (%s,%s)"%(c.getUID(),c.getXCor(),c.getYCor()))
-            outstr="%s,%s,%s,%s,"%(self.ticks,c.getUID(),c.getXCor(),c.getYCor())
-            print("\t  Ideo:",c.getIdeo())
-            outstr="%s,%s"%(outstr,c.getIdeo())
-            print("\t Power:",c.getPower())
-            outstr="%s,%s"%(outstr,c.getPower())
-            print("\tWealth:",c.getWealth())
-            outstr="%s,%s"%(outstr,c.getWealth())
-            print("\t SHldr:",c.getStakeholder())
-            outstr="%s,%s"%(outstr,c.getStakeholder())
-            print("\tSatisfy:",c.getSatisfaction())
-            outstr="%s,%s"%(outstr,c.getSatisfaction())
-            print("\tCBO:")
-            print("\t\t POW:",c.getCbo(Entity.POW))
-            print("\t\t PRF:",c.getCbo(Entity.PRF))
-            print("\t\t  EU:",c.getCbo(Entity.EU))
-            outstr="%s,%s,%s,%s,"%(outstr,c.getCbo(Entity.POW),c.getCbo(Entity.PRF),c.getCbo(Entity.EU))
-            print("\tOwn:")
-            print("\t\t POW:",c.getOwn(Entity.POW))
-            print("\t\t PRF:",c.getOwn(Entity.PRF))
-            print("\t\t  EU:",c.getOwn(Entity.EU))
-            outstr="%s,%s,%s,%s\n"%(outstr,c.getOwn(Entity.POW),c.getOwn(Entity.PRF),c.getOwn(Entity.EU))
-            self.outfile.write(outstr)
-    '''
+        
+                 
+        '''
+        print("CITS#: %s at (%s,%s)"%(c.getUID(),c.getXCor(),c.getYCor()))
+        outstr="%s,%s,%s,%s,"%(self.ticks,c.getUID(),c.getXCor(),c.getYCor())
+        print("\t  Ideo:",c.getIdeo())
+        outstr="%s,%s"%(outstr,c.getIdeo())
+        print("\t Power:",c.getPower())
+        outstr="%s,%s"%(outstr,c.getPower())
+        print("\tWealth:",c.getWealth())
+        outstr="%s,%s"%(outstr,c.getWealth())
+        print("\t SHldr:",c.getStakeholder())
+        outstr="%s,%s"%(outstr,c.getStakeholder())
+        print("\tSatisfy:",c.getSatisfaction())
+        outstr="%s,%s"%(outstr,c.getSatisfaction())
+        print("\tCBO:")
+        print("\t\t POW:",c.getCbo(Entity.POW))
+        print("\t\t PRF:",c.getCbo(Entity.PRF))
+        print("\t\t  EU:",c.getCbo(Entity.EU))
+        outstr="%s,%s,%s,%s,"%(outstr,c.getCbo(Entity.POW),c.getCbo(Entity.PRF),c.getCbo(Entity.EU))
+        print("\tOwn:")
+        print("\t\t POW:",c.getOwn(Entity.POW))
+        print("\t\t PRF:",c.getOwn(Entity.PRF))
+        print("\t\t  EU:",c.getOwn(Entity.EU))
+        outstr="%s,%s,%s,%s\n"%(outstr,c.getOwn(Entity.POW),c.getOwn(Entity.PRF),c.getOwn(Entity.EU))
+        self.outfile.write(outstr)'''
+        
+        
     def Conflict(self):
-        ask cits with [sturcbo? = 1] [
-            if scbo-power >= sum [own-power] of cits with [sturcbo? != 1] * power-parity and
-                abs (scbo-pref - global_gov_ideo) > threshold:
-            [
-                set shape "exclamation"
-                set size 5
-                set color red
-            ]
-        ]
+        #ask cits with [sturcbo? = 1] [
+        #    if scbo-power >= sum [own-power] of cits with [sturcbo? != 1] * power-parity and
+        #        abs (scbo-pref - global_gov_ideo) > threshold:
+        non_sturcbo = 0
+        for cit in self.CITSarr.getCITS(): 
+            if cit.getSturcbo == False:
+                non_sturcbo += cit.getOwn(Enity.POW)
+        
+        for cit in self.CITSarr.getCITS(): 
+            if cit.getSturcbo == True: 
+                 #c.setCbo(Entity.POW,(t2) + (t3) - (c.getOwn(Entity.POW)* ((t4) + (t5) - 1)))
+                 #[
+                #set shape "exclamation"
+                #set size 5
+                #set color red
+            #]
+        #]
+                 if cit.getCbo(Entity.POW) >= non_sturcbo*global_power_parity:
+                     if abs(cits.getCbo(Entity.PREF) - global_gov_ideo) > global_threshold:
+                         CONFLICT_FLAG = True
+                         cit.shape = '!'
+            
 
-    '''
+
 
 
 if __name__ == '__main__':
     
     sim = ComplexIPBModel()
     
-    sim.Setup(10)
-    for i in range(MAX_TICKS):
+    sim.Setup(300)
+    for i in range(3):
         sim.Step()
         print("####################################################################")
         print("####################################################################")

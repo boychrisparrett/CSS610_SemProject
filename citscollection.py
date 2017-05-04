@@ -28,7 +28,7 @@ class CITS_Collection:
     CONST_WEALTH_MEAN = 6.0
     CONST_WEALTH_SD = 13
     CONST_PARTY_NUMBER = 1
-    CONST_TALKSPAN = 10
+    CONST_TALKSPAN = 70
     
     ########################################################################
     #Standard initiatlization routine
@@ -36,6 +36,7 @@ class CITS_Collection:
         #Declare Collection Variables
         self.cits = []
         self.numcits = 0
+        self.locations = []
 
     ########################################################################
     #Standard GET/SET routins for individual turtle with UID = idx
@@ -46,6 +47,10 @@ class CITS_Collection:
     #Standard GET/SET routins for individual turtle with UID = idx
     def getCIT(self,idx): return self.cits[idx]
     def setCIT(self,idx,c): self.cits[idx] = c
+    
+    ##########################################################################
+    #def getLOCS(self): return self.locations #returns array of locations
+    #def setLOCS(self,l): self.locations = l
 
     ##----------------------------------------------------------------------
     ## Name: Initialize
@@ -71,18 +76,28 @@ class CITS_Collection:
             print("ERROR: Number of CITS cannot exceed number of cells")
             return -1
 
+        #PIKE previous code would only have a cit per each x value and 1 vaue (e.g. x=1 or y =1 only had one cit - to check each x,y pair)
         #Initiate CITS agents
         for i in range(self.numcits):
-            
-            #Pick available random X,Y pair and remove from future use
-            ix = random.choice(xarr)
-            xarr.remove(ix)
-            iy = random.choice(yarr)
-            yarr.remove(iy)
-
+            pos = False
+            while pos == False: 
+                ix = random.choice(xarr)
+                #xarr.remove(ix)
+                iy = random.choice(yarr)
+               # yarr.remove(iy)
+                poss_loc =(ix, iy)
+                #locs = self.getLOCS()
+                if poss_loc not in self.locations:
+                    #print (poss_loc, locs)
+                    #locs2 = locs.append(poss_loc)
+                    #print ('THIS IS LOCS 2:', locs2)
+                    self.locations.append(poss_loc)
+                    pos = True
+        
+        
             #Instantiate the agent
             c = CITS(i,ix,iy)
-            print("CITS #%s created at %s %s"%(i,ix,iy))
+            #print("CITS #%s created at %s %s"%(i,ix,iy))
             
             #Initialize the values
             c.setStakeholder(False)
@@ -98,7 +113,7 @@ class CITS_Collection:
 
             #set wealth random-normal cit_wealth_mean cit_wealth_sd
             c.setWealth(random.normalvariate(self.CONST_WEALTH_MEAN,self.CONST_WEALTH_SD))
-            print("\twith wealth = %s"%c.getWealth())
+            #print("\twith wealth = %s"%c.getWealth())
             
             if c.getSelectorate():
                 c.setWealth( c.getWealth() * 1.1)
@@ -203,14 +218,14 @@ class CITS_Collection:
         uid = orig.getUID()
         #Instantiate array
         ret= []
-        print("Assessing uid ",uid)
+        #print("Assessing uid ",uid)
         for c in self.cits:
             #create-linkcits-to cits in-radius talkspan with [who != [who] of myself] [
             #Assess all OTHER nodes...
             if uid != c.getUID():
                 #Calculate cartesian distance SQRT(X^2+Y^2)
                 dist = sqrt(pow((c.getXCor() - x1),2) + pow((c.getYCor() - y1),2))
-                print("\t against: ",c.getUID(), " with dist = ", dist)
+                #print("\t against: ",c.getUID(), " with dist = ", dist)
                 if dist <= self.CONST_TALKSPAN:
                     #Node falls within talkspan distance
                     ret.append(c.getUID())
