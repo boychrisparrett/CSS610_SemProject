@@ -14,6 +14,7 @@ import random
 from cits import *
 from math import sqrt
 from statistics import median
+from entity import *
 
 ##############################################################################
 ##############################################################################
@@ -28,7 +29,7 @@ class CITS_Collection:
     CONST_WEALTH_MEAN = 6.0
     CONST_WEALTH_SD = 13
     CONST_PARTY_NUMBER = 1
-    CONST_TALKSPAN = 70
+    CONST_TALKSPAN = 40
     
     ########################################################################
     #Standard initiatlization routine
@@ -175,6 +176,8 @@ class CITS_Collection:
     def UpdateSatisfaction(self,base,tax,gov_ideo):
         #ask cits [
         for c in self.cits:
+            myc = c #debug
+            
             #let ideo-error -0.02 + random-float 0.04
             ideo_error = -0.02 + (random.random() * 0.04)
 
@@ -216,6 +219,8 @@ class CITS_Collection:
         x1 = orig.getXCor()
         y1 = orig.getYCor()
         uid = orig.getUID()
+        print("self.CONST_TALKSPAN = ",self.CONST_TALKSPAN)
+        print("Checking node %s at %s,%s"%(uid,x1,y1))
         #Instantiate array
         ret= []
         #print("Assessing uid ",uid)
@@ -227,6 +232,7 @@ class CITS_Collection:
                 dist = sqrt(pow((c.getXCor() - x1),2) + pow((c.getYCor() - y1),2))
                 #print("\t against: ",c.getUID(), " with dist = ", dist)
                 if dist <= self.CONST_TALKSPAN:
+                    print("\tAdding node %s at %s away"%(c.getUID(),dist)) 
                     #Node falls within talkspan distance
                     ret.append(c.getUID())
         return ret

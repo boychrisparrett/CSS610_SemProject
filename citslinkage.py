@@ -12,6 +12,7 @@
 
 from link_cits import *
 from cits import *
+import pandas as pd
 
 ##############################################################################
 ##############################################################################
@@ -34,7 +35,15 @@ class CITSLinkage:
     ## Returns: Nothing
     def __init__(self,max_t):
         self.linkcits = {}
-
+        self.disttable = []
+        
+    def __gendistab__(self,citsarr):
+        for ci in citsarr.cits:
+            #get nodes UIDs within range of ci
+            #PIKE had to change  from "ret = ci.NodesWithinRange()" call function in citslinkage
+            ret = citsarr.NodesWithinRange(ci)
+            for l in range(len(ret)):
+                self.disttable.append((ci.UID, ret[l]))
     ##----------------------------------------------------------------------
     ## Name:
     ##
@@ -46,19 +55,25 @@ class CITSLinkage:
     ##    3)
     ##
     ## Returns: Nothing
-    def FormLinks(self,t,cits):
+    def FormLinks(self,t,citsarr):
+        if t == 0:
+            self.__gendistab__(citsarr)
+            
         links = []
-        for ci in cits.cits:
+        lcnt = 0
+        for tpl in self.disttable:
             #get nodes UIDs within range of ci
             #PIKE had to change  from "ret = ci.NodesWithinRange()" call function in citslinkage
-            ret = cits.NodesWithinRange(ci)
-            #PIKE change to return agent ID so Update links line: 87---orig = cits.getCIT(link.getOrignode() ) below to pass in ID versus object
-            for l in range(len(ret)):
-               links.append(LINK_CITS(ci.UID,ret[l]) )
-               links[l].setHidden(True)
+            #ret = citsarr.NodesWithinRange(ci)
+            
+            #PIKE change to return agent ID so Update links line: 87---orig = 
+            #     cits.getCIT(link.getOrignode() ) below to pass in ID versus object
+            #for l in range(len(ret)):
+            links.append( LINK_CITS(tpl[0],tpl[1]) )
+            links[lcnt].setHidden(True)
+            lcnt+=1
         self.linkcits[t] = links
         
-
     ##----------------------------------------------------------------------
     ## Name:
     ##
@@ -81,6 +96,8 @@ class CITSLinkage:
             
             orig = cits.getCIT(link.getOrignode())
             dest = cits.getCIT(link.getDestnode())
+
+            print("** orig=%s \t dest=%s"%(orig.getUID(),dest.getUID()))
 
             ## Get the pref, power, and EU of Orig/end1
             #NL: set pref1 [own-pref] of end1

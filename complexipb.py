@@ -58,6 +58,8 @@ class ComplexIPBModel:
         self.govts.setHidden(True)
 
         #create-cits initial-number
+        if initnum > (MAX_XCOR * MAX_YCOR):
+            print("WARNING: There are more agents than there are spaces!!!")
         self.CITSarr.Initialize(initnum,MAX_XCOR,MAX_YCOR)
 
         #ask cits [ set satisfaction...]
@@ -69,6 +71,7 @@ class ComplexIPBModel:
         #Reset Tick Counter to zero
         self.ticks = 0
         
+        #self.linkcits.FormLinks(self.ticks,self.CITSarr)
         self.outfile = open("CITS_OUT.csv",'w')
         self.outfile.write("Time,CITS,Ideo,Power,Wealth,SHldr,Satisfy,CBOPOW,CBOPRF,CBOEU,OwnPOW,OwnPRF,OwnEU\n")
 
@@ -96,8 +99,11 @@ class ComplexIPBModel:
         # PIKE removed first self, I believe it is ok but not sure
         #think this needs to only be called once... moved up from
         #print (self.CITSarr.cits)
-        print ('STEP 1')
+        
+        #print ('STEP 1')
+        #Form links between agents.
         self.linkcits.FormLinks(self.ticks,self.CITSarr)
+        
         print ('step 2')
         self.Update()
         print ('step 3')
