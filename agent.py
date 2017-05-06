@@ -42,6 +42,7 @@ class Agent:
         self.ideo =0.0    #random.gauss(cit_ideo_mean, cit_ideo_sd)
         self.wealth = 0.0 #random.gauss(cit_wealth_mean, cit_wealth_sd)
         self.power = 0
+        
 
     #####################################################################
     ## Standard Set Routines

@@ -49,6 +49,10 @@ class CITS(Agent):
         self.stemp_eu = 0
         self.turcbo = 0
         self.sturcbo = False
+        self.inlinks = []
+        self.outlinks =[]
+        self.stkinlinks = []
+        self.stkoutlinks = []
 
         #OWN VARIABLE GROUP
         self.own = Entity(0,0,0)
@@ -77,6 +81,10 @@ class CITS(Agent):
     def setTurcbo(self,x): self.turcbo = x
     def setStemp_Eu(self,x): self.stemp_eu = x
     def setSturcbo(self,x): self.sturcbo = x
+    def setInlinks(self, x): self.inlinks.append(x)
+    def setOutlinks(self, x): self.outlinks.append(x)
+    def setStkinlinks(self, x): self.stkinlinks.append(x)
+    def setStkoutlinks(self, x): self.stkoutlinks.append(x)
 
     #####################################################################
     ## Standard Get Routines
@@ -93,6 +101,10 @@ class CITS(Agent):
     def getTurcbo(self): return self.turcbo
     def getStemp_Eu(self): return self.stemp_eu
     def getSturcbo(self): return self.sturcbo
+    def getInlinks(self): return self.inlinks
+    def getOutlinks(self): return self.outlinks
+    def getStkinlinks(self): return self.stkinlinks
+    def getStkoutlinks(self): return self.stkoutlinks
 
     #####################################################################
     ## Generalized Get Routines using ENTITY class, with x = element

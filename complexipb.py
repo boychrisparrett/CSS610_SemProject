@@ -8,11 +8,11 @@ from stakeholderlinkage import *
 
 global_tax = .018
 global_base = 0.685
-global_talkspan = 70
+global_talkspan = 13
 global_govt_base_wealth = 5000
 global_gov_ideo = 10
 global_power_parity = .11
-global_threshold = 29
+global_threshold = 10
 
 MAX_XCOR = 101
 MAX_YCOR = 101
@@ -58,8 +58,6 @@ class ComplexIPBModel:
         self.govts.setHidden(True)
 
         #create-cits initial-number
-        if initnum > (MAX_XCOR * MAX_YCOR):
-            print("WARNING: There are more agents than there are spaces!!!")
         self.CITSarr.Initialize(initnum,MAX_XCOR,MAX_YCOR)
 
         #ask cits [ set satisfaction...]
@@ -71,7 +69,6 @@ class ComplexIPBModel:
         #Reset Tick Counter to zero
         self.ticks = 0
         
-        #self.linkcits.FormLinks(self.ticks,self.CITSarr)
         self.outfile = open("CITS_OUT.csv",'w')
         self.outfile.write("Time,CITS,Ideo,Power,Wealth,SHldr,Satisfy,CBOPOW,CBOPRF,CBOEU,OwnPOW,OwnPRF,OwnEU\n")
 
@@ -99,11 +96,8 @@ class ComplexIPBModel:
         # PIKE removed first self, I believe it is ok but not sure
         #think this needs to only be called once... moved up from
         #print (self.CITSarr.cits)
-        
-        #print ('STEP 1')
-        #Form links between agents.
+        print ('STEP 1')
         self.linkcits.FormLinks(self.ticks,self.CITSarr)
-        
         print ('step 2')
         self.Update()
         print ('step 3')
@@ -115,10 +109,41 @@ class ComplexIPBModel:
         self.StakeholderTalk()
         #self.Conflict()
         #self.UpdatePlot()
+        print ('step 6')
         self.Conflict()
         
         self.ticks += 1
-
+        print ("ticks:", self.ticks)
+        
+        for c in self.CITSarr.cits:
+            outstr=""
+        
+        '''         
+        
+            print("CITS#: %s at (%s,%s)"%(c.getUID(),c.getXCor(),c.getYCor()))
+            outstr="%s,%s,%s,%s,"%(self.ticks,c.getUID(),c.getXCor(),c.getYCor())
+            print("\t  Ideo:",c.getIdeo())
+            outstr="%s,%s"%(outstr,c.getIdeo())
+            print("\t Power:",c.getPower())
+            outstr="%s,%s"%(outstr,c.getPower())
+            print("\tWealth:",c.getWealth())
+            outstr="%s,%s"%(outstr,c.getWealth())
+            print("\t SHldr:",c.getStakeholder())
+            outstr="%s,%s"%(outstr,c.getStakeholder())
+            print("\tSatisfy:",c.getSatisfaction())
+            outstr="%s,%s"%(outstr,c.getSatisfaction())
+            print("\tCBO:")
+            print("\t\t POW:",c.getCbo(Entity.POW))
+            print("\t\t PRF:",c.getCbo(Entity.PRF))
+            print("\t\t  EU:",c.getCbo(Entity.EU))
+            outstr="%s,%s,%s,%s,"%(outstr,c.getCbo(Entity.POW),c.getCbo(Entity.PRF),c.getCbo(Entity.EU))
+            print("\tOwn:")
+            print("\t\t POW:",c.getOwn(Entity.POW))
+            print("\t\t PRF:",c.getOwn(Entity.PRF))
+            print("\t\t  EU:",c.getOwn(Entity.EU))
+            outstr="%s,%s,%s,%s\n"%(outstr,c.getOwn(Entity.POW),c.getOwn(Entity.PRF),c.getOwn(Entity.EU))
+            self.outfile.write(outstr)
+            '''
     ##----------------------------------------------------------------------
     ## Name: Update 
     ##
@@ -172,12 +197,14 @@ class ComplexIPBModel:
 
         #!!! think this needs to only be called once... but in netlogo model, it gets called 
         #!!! every iteration... results in many links.
+        
         self.linkcits.UpdateLinks(self.ticks,self.CITSarr)
 
         #ask linkcits with [citlink? = ticks]
         self.linkcits.ManageCurrentLink(self.ticks,self.CITSarr)
 
         #ask linkcits with [citlink? < ticks]
+        #print ('step 3c')
         for t in range(self.ticks - 1):
             self.linkcits.ManagePreviousLink(t,self.CITSarr)
 
@@ -213,34 +240,6 @@ class ComplexIPBModel:
             self.dlinkstkhldrs.UpdateSholdrCITS(t, self.CITSarr.getCITS())
         
         
-        outstr=""
-        
-                 
-        '''
-        print("CITS#: %s at (%s,%s)"%(c.getUID(),c.getXCor(),c.getYCor()))
-        outstr="%s,%s,%s,%s,"%(self.ticks,c.getUID(),c.getXCor(),c.getYCor())
-        print("\t  Ideo:",c.getIdeo())
-        outstr="%s,%s"%(outstr,c.getIdeo())
-        print("\t Power:",c.getPower())
-        outstr="%s,%s"%(outstr,c.getPower())
-        print("\tWealth:",c.getWealth())
-        outstr="%s,%s"%(outstr,c.getWealth())
-        print("\t SHldr:",c.getStakeholder())
-        outstr="%s,%s"%(outstr,c.getStakeholder())
-        print("\tSatisfy:",c.getSatisfaction())
-        outstr="%s,%s"%(outstr,c.getSatisfaction())
-        print("\tCBO:")
-        print("\t\t POW:",c.getCbo(Entity.POW))
-        print("\t\t PRF:",c.getCbo(Entity.PRF))
-        print("\t\t  EU:",c.getCbo(Entity.EU))
-        outstr="%s,%s,%s,%s,"%(outstr,c.getCbo(Entity.POW),c.getCbo(Entity.PRF),c.getCbo(Entity.EU))
-        print("\tOwn:")
-        print("\t\t POW:",c.getOwn(Entity.POW))
-        print("\t\t PRF:",c.getOwn(Entity.PRF))
-        print("\t\t  EU:",c.getOwn(Entity.EU))
-        outstr="%s,%s,%s,%s\n"%(outstr,c.getOwn(Entity.POW),c.getOwn(Entity.PRF),c.getOwn(Entity.EU))
-        self.outfile.write(outstr)'''
-        
         
     def Conflict(self):
         #ask cits with [sturcbo? = 1] [
@@ -248,21 +247,17 @@ class ComplexIPBModel:
         #        abs (scbo-pref - global_gov_ideo) > threshold:
         non_sturcbo = 0
         for cit in self.CITSarr.getCITS(): 
-            if cit.getSturcbo == False:
-                non_sturcbo += cit.getOwn(Enity.POW)
+            if cit.getSturcbo() == False:
+                non_sturcbo += cit.getOwn(Entity.POW)
+        print ("non_sturcbo", non_sturcbo)
         
         for cit in self.CITSarr.getCITS(): 
-            if cit.getSturcbo == True: 
-                 #c.setCbo(Entity.POW,(t2) + (t3) - (c.getOwn(Entity.POW)* ((t4) + (t5) - 1)))
-                 #[
-                #set shape "exclamation"
-                #set size 5
-                #set color red
-            #]
-        #]
-                 if cit.getCbo(Entity.POW) >= non_sturcbo*global_power_parity:
-                     if abs(cits.getCbo(Entity.PREF) - global_gov_ideo) > global_threshold:
+            if cit.getSturcbo() == True: 
+                print (cit.getScbo(Entity.POW), (non_sturcbo*global_power_parity) ) 
+                if cit.getScbo(Entity.POW) >= non_sturcbo*global_power_parity:
+                     if abs(cits.getScbo(Entity.PREF) - global_gov_ideo) > global_threshold:
                          CONFLICT_FLAG = True
+                         print ("CONFLICT!!!!!!!!!!!!!!!!!!!")
                          cit.shape = '!'
             
 
@@ -273,8 +268,8 @@ if __name__ == '__main__':
     
     sim = ComplexIPBModel()
     
-    sim.Setup(300)
-    for i in range(3):
+    sim.Setup(400)
+    for i in range(MAX_TICKS):
         sim.Step()
         print("####################################################################")
         print("####################################################################")

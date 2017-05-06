@@ -34,8 +34,7 @@ class LINK_CITS(LINK):
     def __init__(self,orig,dest):
         LINK.__init__(self,orig,dest)
         self.intereu = 0
-        self.tempeu = 0
-        #PIKE added 4th variable for diffpref
+        self.tempeu = [0,0]
         self.cbo = Entity(0,0,0)
 
         ###################################################################
@@ -52,8 +51,8 @@ class LINK_CITS(LINK):
     def setIntereu(self,x): self.intereu = x
     def getIntereu(self): return self.intereu
     
-    def setTempEu(self,x): self.tempeu = 0
-    def getTempEu(self): return self.tempeu
+    def setTempEu(self,idx, x): self.tempeu[idx] = x
+    def getTempEu(self, idx): return self.tempeu[idx]
 
     ###################################################################
     ### Set/Get CBO Expected Utility (EU) / Power (POW) / Pref (PRF)
