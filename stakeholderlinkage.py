@@ -13,6 +13,8 @@
 from link_stakeholders import *
 from cits import *
 
+import time
+
 ##############################################################################
 ##############################################################################
 # CLASS::StakeholderLinkage
@@ -38,24 +40,25 @@ class StakeholderLinkage:
     ##
     ## Returns: Nothing
     def FormLinks(self,t,cits):
+        print("\t+++Starting STK Form Links")
+        starttime = time.time()
         links = []
-        
-        for ci in cits.cits:
-            #check if ci is stakeholder
-            
+        for ci in cits.getCITS():
+            #!!! check if ci is stakeholder
             ret = cits.stakeholder_group(ci)
-            
             for l in range(len(ret)):
-               
-               #add to self.linkcits
-               links.append(LINK_STAKEHOLDERS(ci.UID,ret[l]))
-               links[l].setHidden(True)
-               #append to other citizens outlinks
-               #ret[l].setInlinks(LINK_CITS(ci.UID, ret[l]))
-                            
-            
+                #add to self.linkcits
+                links.append(LINK_STAKEHOLDERS(ci.getUID(),ret[l]))
+                links[l].setHidden(True)
+                
+                #append to other citizens outlinks
+                ci.setStkOutlinks(ret[l])  
+                
+                #create inlinks at ret[l]
+                cits.getCIT(ret[l]).setStkInlinks(ci.getUID())
+                
         self.linkshldrs[t] = links
-        print ('FORM Stake LINKS:', len(self.linkshldrs[t]))
+        print ("\tEnding STK FormLinks with %s in %s seconds"%(len(self.linkshldrs[t]),time.time()-starttime))
             
       
                        
@@ -76,6 +79,8 @@ class StakeholderLinkage:
         #ask cits with [stakeholder? = 1] [
         #  create-linkstakeholders-to cits with [stakeholder? = 1] with [who != [who] of myself]
         #  [
+        print("\t+++Starting STK UpdateSHolderLinks")
+        starttime=time.time()
         for link in self.linkshldrs[t]:
             #For readability, get origin and destination node of the link
             orig = cits.getCIT( link.getOrignode() )
@@ -146,9 +151,9 @@ class StakeholderLinkage:
                        
             #link.setStemp(LINK_STAKEHOLDERS.DESTIDX, self.getCurrentMaxOutlinks(t,dest.getOutlinks(), Entity.EU))
                          
-            
-            
             link.setHidden(True)
+        print("\tEnding STK UpdateSHolderLinks in %s seconds"%(time.time()-starttime))
+        
         #]//End ask cits
 
     ##----------------------------------------------------------------------
@@ -166,27 +171,28 @@ class StakeholderLinkage:
         #ask linkstakeholders with [cbolink? = ticks] [
 
         #changes to linksholders from link cits
-        
+        print("\t+++Starting STK ManageCurrentLink")
+        starttime=time.time()
         for link in self.linkshldrs[t]:
             orig = cits.getCIT( link.getOrignode() )
             dest = cits.getCIT( link.getDestnode() )
-
+            #print("Processing link(%s %s)"%(link.getOrignode(),link.getDestnode()))
             #if ([stemp-eu] of end1) + ([stemp-eu] of end2) != (scboeu1 + scboeu2) [
-            if orig.getStemp_Eu() +  dest.getStemp_Eu() != (link.getScboeu(LINK.ORIGIDX) + link.getScboeu(LINK.DESTIDX)):
+            if (orig.getStemp_Eu() +  dest.getStemp_Eu()) != (link.getScboeu(LINK.ORIGIDX) + link.getScboeu(LINK.DESTIDX)):
                 #  die
-                self.removeLink(t,orig,dest)
+                print("\t\tREMOVE STAKEHOLDER LINK")
+                self.removeLink(t,cits,orig,dest)
 
             #if ([stemp-eu] of end1 > [sown-eu] of end1) and ([stemp-eu] of end2 > [sown-eu] of end2)
             #print ("1 node STEMP EU", orig.getStemp_Eu() )
             #print ("1 node getSown", orig.getSown(Entity.EU))
-            
-            
-            
-            if orig.getStemp_Eu() > orig.getSown(Entity.EU) and dest.getStemp_Eu() > dest.getSown(Entity.EU):
+            #print("\t\torig.getStemp_Eu(%s) > orig.getSown(%s)"%(orig.getStemp_Eu(),orig.getSown(Entity.EU)))
+            #print("\t\tdest.getStemp_Eu(%s) > dest.getSown(%s)"%(dest.getStemp_Eu(),dest.getSown(Entity.EU)))
+            if (orig.getStemp_Eu() > orig.getSown(Entity.EU)) and (dest.getStemp_Eu() > dest.getSown(Entity.EU)):
                 #ask end1 [
                 #set sturcbo? 1
-                print ("STURCBO IS TRUE")
-                orig.setSturcbo(1)
+                print ("\t\t\tSTURCBO IS TRUE")
+                orig.setSturcbo(True)
 
                 #!!! IS THIS CORRECT???
                 # PIKE Should be you are getting the max scbo preference of your outlinks as the code is only set to make one link a tick 
@@ -213,7 +219,7 @@ class StakeholderLinkage:
 
                 #ask end2 [
                 #set sturcbo? 0
-                dest.setSturcbo(LINK.DESTIDX,0)
+                dest.setSturcbo(False)
 
                 #set sown-pref [scbo-pref] of other-end
                 dest.setSown(Entity.PRF, orig.getCbo(Entity.PRF))
@@ -259,7 +265,8 @@ class StakeholderLinkage:
                 dest.setSown(Entity.POW, dest.getSown(Entity.POW))
                 dest.setSown(Entity.EU, dest.getSown(Entity.EU))
                 #set sown-power sown-power
-
+        print("\tEnding STK ManageCurrentLink in %s seconds"%(time.time()-starttime))
+        
     ##----------------------------------------------------------------------
     ## Name: ManagePreviousLink
     ##
@@ -272,6 +279,8 @@ class StakeholderLinkage:
     ## Returns: Nothing
     # ask linkcits with [citlink? < ticks] [
     def ManagePreviousLink(self, t, cits):
+        print("\t+++Starting STK ManagePreviousLink")
+        starttime=time.time()
         #----------
         #ask linkstakeholders with [cbolink? < ticks] [
         #chagnes to linksholders
@@ -317,18 +326,19 @@ class StakeholderLinkage:
                 #if count my-out-links with [cbolink? = 3] = 0 and count my-in-links with [cbolink? = ticks] = 0 [
                 if len(self.getLinksFromNode(t,orig)) == 0 and len(self.getLinksToNode(t,orig)) == 0:
                     #set sturcbo? 0
-                    orig.setSturcbo(0)
+                    orig.setSturcbo(False)
                     #set scbo-power 0
                     orig.setScbo(Entity.POW)
                 #ask end2 [
                 #if count my-out-links with [cbolink? = 3] = 0 and count my-in-links with [cbolink? = ticks] = 0 [
                 if len(self.getLinksFromNode(t,dest)) == 0 and len(self.getLinksToNode(t,dest)) == 0:
                     #set sturcbo? 0
-                    dest.setSturcbo(0)
+                    dest.setSturcbo(False)
                     #set scbo-power 0
                     dest.setScbo(Entity.POW)
                 #die
-                link.removeLink(t,orig,dest)
+                print("REMOVE STAKEGOLDER LINK 2")
+                link.removeLink(t,cits,orig,dest)
             else:
                 #if [sown-pref] of end1 != [sown-pref] of end2 [
                 if orig.getSown(Entity.PRF) != dest.getSown(Entity.PRF):
@@ -336,7 +346,7 @@ class StakeholderLinkage:
                         #if count my-out-links with [cbolink? = ticks] = 0 and count my-in-links with [cbolink? = ticks] = 0 [
                         if len(self.getLinksFromNode(t,orig)) == 0 and len(self.getLinksToNode(t,orig)) == 0:
                             #set sturcbo? 1
-                            orig.setSturcbo(1)
+                            orig.setSturcbo(True)
                             
                             #get sown-pref [scbo-pref] of other-end
                             orig.setSown(Entity.PRF, dest.getScbo(Entity.PRF))
@@ -354,7 +364,7 @@ class StakeholderLinkage:
                         #if count my-out-links with [cbolink? = ticks] = 0 and count my-in-links with [cbolink? = ticks] = 0 [
                         if len(self.getLinksFromNode(t,dest)()) == 0 and len(self.getLinksToNode(t,dest)) == 0:
                             #set sturcbo? 1
-                            dest.setSturcbo(1)
+                            dest.setSturcbo(True)
                             
                             #set sown-pref [scbo-pref] of other-end
                             dest.setSown(Entity.PRF, orig.getScbo(Entity.PRF))
@@ -367,7 +377,7 @@ class StakeholderLinkage:
                             
                             #set sown-eu (100 - abs (sown-pref - sown-pref)) * sown-power]]
                             dest.setSown(Entity.EU, 100 * dest.getSown(Entity.POW))
-
+        print("\tEnding STK ManagePreviousLink in %s seconds"%(time.time()-starttime))        
     ##----------------------------------------------------------------------
     ## Name: UpdateSholdrCITS
     ##
@@ -381,6 +391,8 @@ class StakeholderLinkage:
     def UpdateSholdrCITS(self,t, cits):
         #-----------------
         #ask cits ...
+        print("\t+++Starting STK UpdateSholdrCITS")
+        starttime=time.time()
         for c in cits:
             #... with [stakeholder? = 1] [
             if c.getStakeholder():
@@ -398,6 +410,7 @@ class StakeholderLinkage:
                     #set scbo-power 0
                     c.setScbo(Entity.POW, 0)
         #end
+        print("\tEnding STK UpdateSholdrCITS in %s seconds"%(time.time()-starttime))
 
     ##----------------------------------------------------------------------
     ## Name: getLinksToNode
@@ -445,8 +458,15 @@ class StakeholderLinkage:
     ##
     ## Returns: Nothing
     def removeLink(self,t,orig,dest):
-        self.linkshldrs[t][orig].remove(dest)
-
+        #self.linkshldrs[t][orig].remove(dest)
+        for link in self.linkshldrs[t]:
+            if link.getOrignode() == orig.getUID() and link.getDestnode() == dest.getUID():
+                self.linkshldrs[t].remove(link)
+                
+                orig.removeStkOutlink(dest.getUID())
+                dest.removeStkInlink(orig.getUID())
+               
+                break #No need to continue... link destroyed
     ##----------------------------------------------------------------------
     ## Name:
     ##

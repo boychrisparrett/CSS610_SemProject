@@ -40,7 +40,7 @@ class LINK_STAKEHOLDERS(LINK):
         self.stemp = Entity(0,0,0)
         self.sintereu = 0
         self.scboeu = [0,0]
-        self.sturcbo = [0,0]
+        self.sturcbo = [False,False]
         
     ###################################################################
     ### Set Entity-based variables, where x = element and v = value 
