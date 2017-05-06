@@ -96,20 +96,20 @@ class ComplexIPBModel:
         # PIKE removed first self, I believe it is ok but not sure
         #think this needs to only be called once... moved up from
         #print (self.CITSarr.cits)
-        print ('STEP 1')
-        self.linkcits.FormLinks(self.ticks,self.CITSarr)
-        print ('step 2')
+        print ('STEP 1 FormLinks')
+        self.linkcits.FormLinks(self.ticks, self.CITSarr)
+        print ('STEP 2 Update')
         self.Update()
-        print ('step 3')
+        print ('STEP 3 CITS_Talk')
         self.CITS_Talk()
-        print ('step 4')
+        print ('STEP 4 dlinkstkhldrs.FormLinks')
         #repeat process at stakeholder level
         self.dlinkstkhldrs.FormLinks(self.ticks, self.CITSarr)
-        print ('Step 5')
+        print ('STEP 5 StakeholderTalk')
         self.StakeholderTalk()
         #self.Conflict()
         #self.UpdatePlot()
-        print ('step 6')
+        print ('STEP 6 Conflict')
         self.Conflict()
         
         self.ticks += 1
@@ -209,7 +209,7 @@ class ComplexIPBModel:
             self.linkcits.ManagePreviousLink(t,self.CITSarr)
 
             #ask cits with [stakeholder? = 1] [
-            self.linkcits.UpdateCITS(t, self.CITSarr.getCITS())
+            self.linkcits.UpdateCITS(t, self.CITSarr)
 
 
     ##----------------------------------------------------------------------
@@ -234,13 +234,21 @@ class ComplexIPBModel:
         
         self.dlinkstkhldrs.ManageCurrentLink(self.ticks, self.CITSarr)        
         
-        for t in range(self.ticks -1):
+        for t in range(self.ticks-1):
             self.dlinkstkhldrs.ManagePreviousLink(t,self.CITSarr)
             
             self.dlinkstkhldrs.UpdateSholdrCITS(t, self.CITSarr.getCITS())
         
         
-        
+    ##----------------------------------------------------------------------
+    ## Name: Conflict
+    ##
+    ## Desc: detect conflict
+    ##
+    ## Parameters:
+    ##    3) 
+    ##
+    ## Returns: Nothing    
     def Conflict(self):
         #ask cits with [sturcbo? = 1] [
         #    if scbo-power >= sum [own-power] of cits with [sturcbo? != 1] * power-parity and
@@ -249,16 +257,17 @@ class ComplexIPBModel:
         for cit in self.CITSarr.getCITS(): 
             if cit.getSturcbo() == False:
                 non_sturcbo += cit.getOwn(Entity.POW)
-        print ("non_sturcbo", non_sturcbo)
+        print ("\tnon_sturcbo", non_sturcbo)
         
-        for cit in self.CITSarr.getCITS(): 
-            if cit.getSturcbo() == True: 
+        for cit in self.CITSarr.getCITS():
+            if cit.getSturcbo() == True:
                 print (cit.getScbo(Entity.POW), (non_sturcbo*global_power_parity) ) 
+                
                 if cit.getScbo(Entity.POW) >= non_sturcbo*global_power_parity:
-                     if abs(cits.getScbo(Entity.PREF) - global_gov_ideo) > global_threshold:
-                         CONFLICT_FLAG = True
-                         print ("CONFLICT!!!!!!!!!!!!!!!!!!!")
-                         cit.shape = '!'
+                    if abs(cits.getScbo(Entity.PREF) - global_gov_ideo) > global_threshold:
+                        CONFLICT_FLAG = True
+                        print ("CONFLICT!!!!!!!!!!!!!!!!!!!")
+                        cit.shape = '!'
             
 
 

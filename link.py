@@ -44,6 +44,12 @@ class LINK:
         #     they are to form cbo
         #self.diffpref = 100000000.0
         
+    def __eq__(self,other):
+        return ((self.orignode == other.getOrignode()) and (self.destnode == other.getDestnode()))
+    
+    def __ne__(self,other):
+        return ((self.orignode != other.getOrignode()) and (self.destnode != other.getDestnode()))
+    
     #######################################################################
     ## Standard Set Routines
     def setOrignode(self,x): self.orignode = x
