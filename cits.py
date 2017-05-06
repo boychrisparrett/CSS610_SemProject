@@ -49,11 +49,13 @@ class CITS(Agent):
         self.stemp_eu = 0
         self.turcbo = 0
         self.sturcbo = False
-        self.inlinks = []
-        self.outlinks =[]
-        self.stkinlinks = []
-        self.stkoutlinks = []
-
+        #Implemented below as unordered lists of unique objects
+        self.inlinks = set() 
+        self.outlinks = set() 
+        self.stkinlinks = set() 
+        self.stkoutlinks = set() 
+        self.citlink = 0
+        
         #OWN VARIABLE GROUP
         self.own = Entity(0,0,0)
 
@@ -81,10 +83,10 @@ class CITS(Agent):
     def setTurcbo(self,x): self.turcbo = x
     def setStemp_Eu(self,x): self.stemp_eu = x
     def setSturcbo(self,x): self.sturcbo = x
-    def setInlinks(self, x): self.inlinks.append(x)
-    def setOutlinks(self, x): self.outlinks.append(x)
-    def setStkinlinks(self, x): self.stkinlinks.append(x)
-    def setStkoutlinks(self, x): self.stkoutlinks.append(x)
+    def setInlinks(self, x): self.inlinks.add(x)           #Set: no need to check for duplicates
+    def setOutlinks(self, x): self.outlinks.add(x)         #Set: no need to check for duplicates
+    def setStkInlinks(self, x): self.stkinlinks.add(x)     #Set: no need to check for duplicates
+    def setStkOutlinks(self, x): self.stkoutlinks.add(x)   #Set: no need to check for duplicates
 
     #####################################################################
     ## Standard Get Routines
@@ -103,9 +105,9 @@ class CITS(Agent):
     def getSturcbo(self): return self.sturcbo
     def getInlinks(self): return self.inlinks
     def getOutlinks(self): return self.outlinks
-    def getStkinlinks(self): return self.stkinlinks
-    def getStkoutlinks(self): return self.stkoutlinks
-
+    def getStkInlinks(self): return self.stkinlinks
+    def getStkOutlinks(self): return self.stkoutlinks
+    
     #####################################################################
     ## Generalized Get Routines using ENTITY class, with x = element
     def getOwn(self,x): return self.own.getEntity(x)
@@ -120,3 +122,16 @@ class CITS(Agent):
     def setSown(self,x,v): self.sown.setEntity(x,v)
     def setCbo(self,x,v): self.cbo.setEntity(x,v)
     def setScbo(self,x,v): self.scbo.setEntity(x,v)
+    
+    #####################################################################
+    ## Remove Links from Set
+    def setCitlink(self,v): self.citlink = v
+    def getCitlink(self): return self.citlink
+    def removeInlink(self,node): 
+        if node in self.inlinks: self.inlinks.remove(node)
+    def removeOutlink(self,node):
+        if node in self.outlinks: self.outlinks.remove(node)
+    def removeStkInlink(self,node):
+        if node in self.stkinlinks: self.stkinlinks.remove(node)
+    def removeStkOutlink(self,node):
+        if node in self.stkoutlinks: self.stkoutlinks.remove(node)

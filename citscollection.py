@@ -232,7 +232,7 @@ class CITS_Collection:
         return ret
     
     ##---------------------------------------------------------------------------
-    ## Name: Nodes who are ctiznes
+    ## Name: stakeholder_group
     ##
     ## Desc: Find all nodes with who are stakeholders 
     ##
