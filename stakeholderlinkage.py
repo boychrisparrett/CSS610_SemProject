@@ -40,29 +40,27 @@ class StakeholderLinkage:
     ##
     ## Returns: Nothing
     def FormLinks(self,t,cits):
-        print("\t+++Starting STK Form Links")
+        #print("\t+++Starting STK Form Links")
         starttime = time.time()
         links = []
         for ci in cits.getCITS():
-            #!!! check if ci is stakeholder
-            ret = cits.stakeholder_group(ci)
-            for l in range(len(ret)):
-                #add to self.linkcits
-                links.append(LINK_STAKEHOLDERS(ci.getUID(),ret[l]))
-                links[l].setHidden(True)
-                
-                #append to other citizens outlinks
-                ci.setStkOutlinks(ret[l])  
-                
-                #create inlinks at ret[l]
-                cits.getCIT(ret[l]).setStkInlinks(ci.getUID())
-                
+            if ci.getStakeholder():
+                #ci is stakeholder
+                print("AGENT %s IS A STAKEHOLDER!"%ci.getUID())
+                ret = cits.stakeholder_group(ci)
+                for l in range(len(ret)):
+                    #add to self.linkcits
+                    links.append(LINK_STAKEHOLDERS(ci.getUID(),ret[l]))
+                    links[l].setHidden(True)
+
+                    #append to other citizens outlinks
+                    ci.setStkOutlinks(ret[l])
+
+                    #create inlinks at ret[l]
+                    cits.getCIT(ret[l]).setStkInlinks(ci.getUID())
+                    
         self.linkshldrs[t] = links
-        print ("\tEnding STK FormLinks with %s in %s seconds"%(len(self.linkshldrs[t]),time.time()-starttime))
-            
-      
-                       
-        
+       # print ("\tEnding STK FormLinks with %s in %s seconds"%(len(self.linkshldrs[t]),time.time()-starttime))
     
     ##----------------------------------------------------------------------
     ## Name: UpdateSHolderLinks
@@ -79,13 +77,14 @@ class StakeholderLinkage:
         #ask cits with [stakeholder? = 1] [
         #  create-linkstakeholders-to cits with [stakeholder? = 1] with [who != [who] of myself]
         #  [
-        print("\t+++Starting STK UpdateSHolderLinks")
+        #print("\t+++Starting STK UpdateSHolderLinks")
         starttime=time.time()
         for link in self.linkshldrs[t]:
+            
             #For readability, get origin and destination node of the link
             orig = cits.getCIT( link.getOrignode() )
             dest = cits.getCIT( link.getDestnode() )
-
+            print("\t\tSLINK %s, %s"%(link.getOrignode(),link.getDestnode()))
             # set cbolink? ticks
             # PIKE changed form True to t
             link.setCbolink(t)
@@ -127,8 +126,8 @@ class StakeholderLinkage:
             #ask end1 [
             #if empty? [scboeu1] of my-out-links with [cbolink? = 3][
         
-            
-            if self.getLinksFromNode(t,orig) is None:
+
+            if len(self.getLinksFromNode(t,orig)) == 0:
                 # set stemp-eu 0
                 orig.setStemp_Eu(0)
             else:
@@ -138,7 +137,7 @@ class StakeholderLinkage:
              
             #ask end2 [
             #if empty? [scboeu1] of my-in-links with [cbolink? = 3][
-            if self.getLinksToNode(t,dest) is None:
+            if len(self.getLinksToNode(t,dest)) == 0:
                 # set stemp-eu 0
                 dest.setStemp_Eu(0)
             else:
@@ -152,7 +151,7 @@ class StakeholderLinkage:
             #link.setStemp(LINK_STAKEHOLDERS.DESTIDX, self.getCurrentMaxOutlinks(t,dest.getOutlinks(), Entity.EU))
                          
             link.setHidden(True)
-        print("\tEnding STK UpdateSHolderLinks in %s seconds"%(time.time()-starttime))
+        #print("\tEnding STK UpdateSHolderLinks in %s seconds"%(time.time()-starttime))
         
         #]//End ask cits
 
@@ -171,7 +170,7 @@ class StakeholderLinkage:
         #ask linkstakeholders with [cbolink? = ticks] [
 
         #changes to linksholders from link cits
-        print("\t+++Starting STK ManageCurrentLink")
+        #print("\t+++Starting STK ManageCurrentLink")
         starttime=time.time()
         for link in self.linkshldrs[t]:
             orig = cits.getCIT( link.getOrignode() )
@@ -265,7 +264,7 @@ class StakeholderLinkage:
                 dest.setOwn(Entity.POW, dest.getSown(Entity.POW))
                 dest.setOwn(Entity.EU, dest.getSown(Entity.EU))
                 #set sown-power sown-power
-        print("\tEnding STK ManageCurrentLink in %s seconds"%(time.time()-starttime))
+        #print("\tEnding STK ManageCurrentLink in %s seconds"%(time.time()-starttime))
         
     ##----------------------------------------------------------------------
     ## Name: ManagePreviousLink
@@ -279,7 +278,7 @@ class StakeholderLinkage:
     ## Returns: Nothing
     # ask linkcits with [citlink? < ticks] [
     def ManagePreviousLink(self, t, cits):
-        print("\t+++Starting STK ManagePreviousLink")
+        #print("\t+++Starting STK ManagePreviousLink")
         starttime=time.time()
         #----------
         #ask linkstakeholders with [cbolink? < ticks] [
@@ -362,7 +361,7 @@ class StakeholderLinkage:
                         
                         #ask end2 [
                         #if count my-out-links with [cbolink? = ticks] = 0 and count my-in-links with [cbolink? = ticks] = 0 [
-                        if len(self.getLinksFromNode(t,dest)()) == 0 and len(self.getLinksToNode(t,dest)) == 0:
+                        if len(self.getLinksFromNode(t,dest)) == 0 and len(self.getLinksToNode(t,dest)) == 0:
                             #set sturcbo? 1
                             dest.setSturcbo(True)
                             
@@ -377,7 +376,7 @@ class StakeholderLinkage:
                             
                             #set sown-eu (100 - abs (sown-pref - sown-pref)) * sown-power]]
                             dest.setSown(Entity.EU, 100 * dest.getSown(Entity.POW))
-        print("\tEnding STK ManagePreviousLink in %s seconds"%(time.time()-starttime))        
+        #print("\tEnding STK ManagePreviousLink in %s seconds"%(time.time()-starttime))        
     ##----------------------------------------------------------------------
     ## Name: UpdateSholdrCITS
     ##
@@ -391,7 +390,7 @@ class StakeholderLinkage:
     def UpdateSholdrCITS(self,t, cits):
         #-----------------
         #ask cits ...
-        print("\t+++Starting STK UpdateSholdrCITS")
+        #print("\t+++Starting STK UpdateSholdrCITS")
         starttime=time.time()
         for c in cits:
             #... with [stakeholder? = 1] [
@@ -410,7 +409,7 @@ class StakeholderLinkage:
                     #set scbo-power 0
                     c.setScbo(Entity.POW, 0)
         #end
-        print("\tEnding STK UpdateSholdrCITS in %s seconds"%(time.time()-starttime))
+        #print("\tEnding STK UpdateSholdrCITS in %s seconds"%(time.time()-starttime))
 
     ##----------------------------------------------------------------------
     ## Name: getLinksToNode
@@ -430,7 +429,7 @@ class StakeholderLinkage:
         return ret
 
     ##----------------------------------------------------------------------
-    ## Name: getLinksToNode
+    ## Name: getLinksFromNode
     ##
     ## Desc: Find all out-going links from a node
     ##
@@ -482,7 +481,7 @@ class StakeholderLinkage:
         lv = 0.0
         for i in self.linkshldrs[t]:
             if i.getOrignode() == node.getUID() and lv < i.getScbo(param):
-                    lv = i.getCbo(param)
+                    lv = i.getScbo(param)
         return lv
 
     ##----------------------------------------------------------------------
@@ -500,7 +499,7 @@ class StakeholderLinkage:
         lv = 0.0
         for i in self.linkshldrs[t]:
             if i.getDestnode() == node.getUID() and lv < i.getScbo(param):
-                lv = i.getCbo(param)
+                lv = i.getScbo(param)
         return lv
 
     ##----------------------------------------------------------------------
@@ -518,7 +517,7 @@ class StakeholderLinkage:
         lv = 100000000.0
         for i in self.linkshldrs[t]:
             if i.getOrignode() == node.getUID() and lv > i.getScbo(param):
-                    lv = i.getCbo(param)
+                    lv = i.getScbo(param)
         return lv
 
     ##----------------------------------------------------------------------
@@ -536,5 +535,5 @@ class StakeholderLinkage:
         lv = 100000000.0
         for i in self.linkshldrs[t]:
             if i.getDestnode() == node.getUID() and lv > i.getScbo(param):
-                lv = i.getCbo(param)
+                lv = i.getScbo(param)
         return lv

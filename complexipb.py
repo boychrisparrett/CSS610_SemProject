@@ -6,9 +6,9 @@ from link_stakeholders import *
 from citslinkage import *
 from stakeholderlinkage import *
 
-global_tax = .018
+global_tax = .075
 global_base = 0.685
-global_talkspan = 13
+global_talkspan = 25
 global_govt_base_wealth = 5000
 global_gov_ideo = 10
 global_power_parity = .11
@@ -111,7 +111,9 @@ class ComplexIPBModel:
         #self.UpdatePlot()
         print ('STEP 6 Conflict')
         self.Conflict()
-        
+        if CONFLICT_FLAG: 
+            print("WAR!!! WHAT IS IT GOOD FOR?!?!?")
+            return 1
         self.ticks += 1
         print ("ticks:", self.ticks)
         
@@ -268,6 +270,7 @@ class ComplexIPBModel:
                         CONFLICT_FLAG = True
                         print ("CONFLICT!!!!!!!!!!!!!!!!!!!")
                         cit.shape = '!'
+                        break
             
 
 

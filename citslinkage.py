@@ -50,15 +50,15 @@ class CITSLinkage:
     ## Returns: Nothing
     def FormLinks(self,t,cits):
         links = []
-        mjr_time_start = time.time()
-        print("\t***Starting CITS FormLinks")
+        #mjr_time_start = time.time()
+        #print("\t***Starting CITS FormLinks")
         for ci in cits.getCITS():
-            inner_time_start = time.time()
+            #inner_time_start = time.time()
             #get nodes UIDs within range of ci
             #PIKE had to change  from "ret = ci.NodesWithinRange()" call function in citslinkage
             ret = cits.NodesWithinRange(ci)
             #PIKE change to return agent ID so Update links line: 87---orig = cits.getCIT(link.getOrignode() ) below to pass in ID versus object
-            print("There are %s nodes within reach."%len(ret))
+            #print("There are %s nodes within reach."%len(ret))
             for l in range(len(ret)):
 
                 #add to self.linkcits
@@ -73,15 +73,15 @@ class CITSLinkage:
                 cits.getCIT(ret[l]).setInlinks(ci.getUID())
                 cits.getCIT(ret[l]).setCitlink(1)  #!!! not sure this is right... but seems so
                 
-                print("\tLength of outlinks: %s\n\tLength of inlinks: %s"%(len(ci.getOutlinks()),len(cits.getCIT(ret[l]).getInlinks())))
+                #print("\tLength of outlinks: %s\n\tLength of inlinks: %s"%(len(ci.getOutlinks()),len(cits.getCIT(ret[l]).getInlinks())))
                 
                 #outs.append(LINK_CITS(ci.UID, ret[l]))
-            inner_time_stop = time.time()
-            print("Inner Loop #%s took %s seconds."%(ci.getUID(),inner_time_stop-inner_time_start))
+            #inner_time_stop = time.time()
+            #print("Inner Loop #%s took %s seconds."%(ci.getUID(),inner_time_stop-inner_time_start))
         mjr_time_stop = time.time()
         self.linkcits[t] = links
         #print ('\tTOTAL LINKS FORMED: %s in %s seconds'%(len(self.linkcits[t]),mjr_time_stop-mjr_time_start))
-        print("\tEnding CITS FormLinks in %s seconds",(time.time()-mjr_time_start))
+        #print("\tEnding CITS FormLinks in %s seconds",(time.time()-mjr_time_start))
     ##----------------------------------------------------------------------
     ## Name:
     ##
@@ -97,7 +97,7 @@ class CITSLinkage:
     def UpdateLinks(self,t,cits):
         #NL: set citlink? ticks  ***NOT NEEDED... INFERRED***
        
-        print ('\t***Start UpdateLinks')
+        #print ('\t***Start UpdateLinks')
         starttime = time.time()
         count = 0
         for link in self.linkcits[t]:
@@ -179,14 +179,17 @@ class CITSLinkage:
             #NL: ask end1
             #NL: if empty? [cboeu1] of my-out-links with [citlink? = ticks]:
             #if self.getLinksFromNode(t,orig) is None:
-                #link.setTempEu(0)
+            #    link.setTempEu(0)
             #else:
                 #NL: set temp-eu max [cboeu1] of my-out-links with [citlink? = ticks]
                 # PIKE Needs to be refined for future models could have two agents one close to preference and one close to to EU
                 # PIKE changed to Entity.EU from "cboeu'; 
                 # PIKE changed code for getCurrentMaxOutlinks
             #print ("step 3a-2")
-            link.setTempEu(LINK_CITS.ORIGIDX, self.getCurrentMaxOutlinks(cits, orig, Entity.EU))
+            val = self.getCurrentMaxOutlinks(cits, orig, Entity.EU)
+            #print("\t\tsetTemp_Eu orig setting to: %s"%val)
+            link.setTempEu(LINK_CITS.ORIGIDX,val)
+            orig.setTemp_Eu(val)
             
             #print ('3a-2')
             #NL: set minpref min [diffpref1] of my-out-links with citlink? = ticks]
@@ -210,8 +213,11 @@ class CITSLinkage:
             
             #PIKE MADE SAME FOR desitnation node as orginal node
             #print ('3a-3')
-            link.setTempEu(LINK_CITS.DESTIDX, self.getCurrentMaxOutlinks(cits,dest, Entity.EU))
-             
+            val = self.getCurrentMaxOutlinks(cits,dest, Entity.EU)
+            link.setTempEu(LINK_CITS.DESTIDX,val)
+            dest.setTemp_Eu(val)
+            #print("\t\tsetTemp_Eu dest setting to: %s"%val)
+            
             #print ('3a-4')
             #link.setMinpref(LINK.DESTIDX, self.getCurrentMinOutlinks(cits,dest,"diffpref"))
             val = self.getDiffprefMinOutlinks(cits, dest)
@@ -237,7 +243,7 @@ class CITSLinkage:
             count +=1
             #print (count)
                 
-        print("\tEnd UpdateLinks with %s links in %s seconds"%(len(self.linkcits[t]),time.time()-starttime))
+        #print("\tEnd UpdateLinks with %s links in %s seconds"%(len(self.linkcits[t]),time.time()-starttime))
 
     ##----------------------------------------------------------------------
     ## Name:
@@ -252,38 +258,33 @@ class CITSLinkage:
     ## Returns: Nothing
     #  ask linkcits with [citlink? = ticks] [
     def ManageCurrentLink(self,t,cits):
-        print ("\t***Starting Manage with %s links"%len(self.linkcits[t]))
-        starttime=time.time()
+        #print ("\t***Starting Manage with %s links"%len(self.linkcits[t]))
+        #starttime=time.time()
         for link in self.linkcits[t]:
             orig = cits.getCIT( link.getOrignode() )
             dest = cits.getCIT( link.getDestnode() )
+            #print ("\t\tlink.Cboeu(orig) < orig.getTemp_Eu:\t %s < %s"%(link.getCboeu(LINK_CITS.ORIGIDX),orig.getTemp_Eu()))
+            #print ("\t\tlink.Cboeu(orig) < orig.getOwn(EU):\t %s < %s"%(link.getCboeu(LINK_CITS.ORIGIDX),orig.getOwn(Entity.EU)))
+            #print ("\t\tlink.Cboeu(dest) < dest.getOwn(EU):\t %s < %s"%(link.getCboeu(LINK_CITS.DESTIDX),dest.getOwn(Entity.EU)))
+            #print ("\t\tlink.getDiffpref < dest.getMinpref:\t %s < %s"%(link.getDiffpref(LINK_CITS.DESTIDX),dest.getMinpref()))
+            
             #if cboeu1 < [temp-eu] of end1 [die]
-            print ("\t\tlink.Cboeu(orig) < orig.getTemp_Eu:\t %s < %s"%(link.getCboeu(LINK_CITS.ORIGIDX),orig.getTemp_Eu()))
-            print ("\t\tlink.Cboeu(orig) < orig.getOwn(EU):\t %s < %s"%(link.getCboeu(LINK_CITS.ORIGIDX),orig.getOwn(Entity.EU)))
-            print ("\t\tlink.Cboeu(dest) < dest.getOwn(EU):\t %s < %s"%(link.getCboeu(LINK_CITS.DESTIDX),dest.getOwn(Entity.EU)))
-            print ("\t\tlink.getDiffpref < dest.getMinpref:\t %s < %s"%(link.getDiffpref(LINK_CITS.DESTIDX),dest.getMinpref()))
-            if link.getCboeu(LINK_CITS.ORIGIDX) < orig.getTemp_Eu():
-                #self.linkcits[t].remove(link)
-                self.removeLink(t,cits,orig,dest)
+            if link.getCboeu(LINK_CITS.ORIGIDX) < orig.getTemp_Eu(): self.removeLink(t,cits,orig,dest)
+            
             #if cboeu1 < [own-eu] of end1 [die]
-            elif link.getCboeu(LINK_CITS.ORIGIDX) < orig.getOwn(Entity.EU):
-                #self.linkcits[t].remove(link)
-                self.removeLink(t,cits,orig,dest)
+            if link.getCboeu(LINK_CITS.ORIGIDX) < orig.getOwn(Entity.EU): self.removeLink(t,cits,orig,dest)
 
             #if cboeu2 <= [own-eu] of end2 [die]
-            elif link.getCboeu(LINK_CITS.DESTIDX) < dest.getOwn(Entity.EU):
-                #self.linkcits[t].remove(link)
-                self.removeLink(t,cits,orig,dest)
+            if link.getCboeu(LINK_CITS.DESTIDX) < dest.getOwn(Entity.EU): self.removeLink(t,cits,orig,dest)
 
             #if diffpref2 > [minpref] of end2 [die]
-            # PIKE - sign was backward -------------------RFI to Z seems unnecessary will always be equal based on previous method
-            elif link.getDiffpref(LINK_CITS.DESTIDX) > dest.getMinpref():
-                #self.linkcits[t].remove(link)
-                self.removeLink(t,cits,orig,dest)
+            # PIKE - sign was backward (CMP Changed it): 
+            # seems unnecessary will always be equal based on previous method
+            if link.getDiffpref(LINK_CITS.DESTIDX) < dest.getMinpref(): self.removeLink(t,cits,orig,dest)
 
             # ifelse ([temp-eu] of end1 > [own-eu] of end1) and
             #        ([temp-eu] of end2 > [own-eu] of end2)
-            elif (orig.getTemp_Eu() > orig.getOwn(Entity.EU)) and (dest.getTemp_Eu() > dest.getOwn(Entity.EU)) :
+            if (orig.getTemp_Eu() > orig.getOwn(Entity.EU)) and (dest.getTemp_Eu() > dest.getOwn(Entity.EU)):
                 #ask end1 [
                 #set turcbo 2
                 orig.setTurcbo(2)
@@ -370,7 +371,7 @@ class CITSLinkage:
                 #!!! WHY??? 1 == 1, 2 == 2, etc. No need to assign itself its own value?
                 #self.linkcits[t].remove(link)
                 self.removeLink(t,cits,orig,dest)
-        print ("\tEnding ManageLinks with %s links in %s seconds"%(len(self.linkcits[t]),time.time()-starttime))
+        #print ("\tEnding ManageLinks with %s links in %s seconds"%(len(self.linkcits[t]),time.time()-starttime))
     ##----------------------------------------------------------------------
     ## Name:
     ##
@@ -384,7 +385,7 @@ class CITSLinkage:
     ## Returns: Nothing
     # ask linkcits with [citlink? < ticks] [
     def ManagePreviousLink(self, t, cits):
-        print ("\t***Starting ManagePreviousLink with %s links"%len(self.linkcits[t]))
+        #print ("\t***Starting ManagePreviousLink with %s links"%len(self.linkcits[t]))
         starttime=time.time()
         #print ('previouslinks1', len(self.linkcits[t]))
         for link in self.linkcits[t]:
@@ -428,7 +429,7 @@ class CITSLinkage:
                 link.setCbo(Entity.POW,(power1 + power2) * 1.5)
                 
                 #PIKE missing set cboeu cbopower * (100 - abs (cbopref - cbopref))
-                link.setCbo(Entity.EU, orig.getOwn(Entity.POW) * 100 )
+                link.setCbo(Entity.EU, orig.getCbo(Entity.POW) * 100 )
                 
                 #################### PIKE skipped cboeu12 as not referenced later as in line 120 
                 
@@ -439,15 +440,16 @@ class CITSLinkage:
 
                     #!!! NOT SURE WHAT CITLINK? = 2 CONDITION IS OR WHERE IT IS SET
                     #if len(self.getLinksFromNode(t,orig)) == 0 and len(self.getLinksToNode(t,orig)) == 0:
+                    #if len(orig.getOutlinks()) == 0 and len(orig.getInlinks()) == 0:
                     #set turcbo 1
                     orig.setTurcbo(1)
 
                     #set cbo-pref 0
                     orig.setCbo(Entity.PRF,0)
-                    
+
                     #set cbo-power 0
                     orig.setCbo(Entity.POW,0)
-                    
+
                     #set stakeholder? 0
                     orig.setStakeholder(False)
 
@@ -463,7 +465,7 @@ class CITSLinkage:
                     #ask end2 [
                     #!!! NOT SURE WHAT CITLINK? = 2 CONDITION IS OR WHERE IT IS SET
                     #if len(self.getLinksFromNode(t,dest)) == 0 and len(self.getLinksToNode(t,dest)) == 0:
-
+                    #if len(dest.getOutlinks()) == 0 and len(dest.getInlinks()) == 0:
                     #set turcbo 1
                     dest.setTurcbo(1)
 
@@ -493,6 +495,7 @@ class CITSLinkage:
                     #ifelse count my-out-links with [citlink? = 2] = 0 and count my-in-links with [citlink? = 2] = 0 [
                     #!!! NOT SURE WHAT CITLINK? = 2 CONDITION IS OR WHERE IT IS SET
                     if len(self.getLinksFromNode(t,orig)) == 0 and len(self.getLinksToNode(t,orig)) == 0: 
+                    #if len(orig.getOutlinks()) == 0 and len(orig.getInlinks()) == 0:
                         #set turcbo 2
                         orig.setTurcbo(2)
 
@@ -520,6 +523,7 @@ class CITSLinkage:
                     #!!! NOT SURE WHAT CITLINK? = 2 CONDITION IS OR WHERE IT IS SET
                     ## PIKE think this should be if there is a link?
                     if len(self.getLinksFromNode(t,dest)) == 0 and len(self.getLinksToNode(t,dest)) == 0:
+                    #if len(dest.getOutlinks()) == 0 and len(dest.getInlinks()) == 0:
                         #set turcbo 2
                         dest.setTurcbo(2)
 
@@ -542,7 +546,7 @@ class CITSLinkage:
                         dest.setStakeholder(True)
                     #set hidden? FALSE
                     #self.linkcits[t].setHidden(False)
-        print ("\tEnding ManagePreviousLink with %s links in %s seconds"%(len(self.linkcits[t]),time.time()-starttime))
+        #print ("\tEnding ManagePreviousLink with %s links in %s seconds"%(len(self.linkcits[t]),time.time()-starttime))
         
         
     ##----------------------------------------------------------------------
@@ -559,7 +563,7 @@ class CITSLinkage:
     def UpdateCITS(self,t, cits):
         #ask cits with [stakeholder? = 1] [
         starttime=time.time()
-        print("\t***Starting UpdateCITS")
+        #print("\t***Starting UpdateCITS")
         for c in cits.getCITS():
             if c.getStakeholder():
                 #!!! I am not convinced the below is theoretically correct (syntactically ok). 
@@ -577,8 +581,8 @@ class CITSLinkage:
                 t3,t5 = self.getSumInlinksP(cits, c, Entity.POW)
 
                 c.setCbo(Entity.POW,(t2) + (t3) - (c.getOwn(Entity.POW)* ((t4) + (t5) - 1)))
-
-        print("\tEnding UpdateCITS in %s seconds"%(time.time()-starttime))
+                print("c.setCBO(POW) = %s"%((t2) + (t3) - (c.getOwn(Entity.POW)* ((t4) + (t5) - 1))))
+        #print("\tEnding UpdateCITS in %s seconds"%(time.time()-starttime))
 
     ##----------------------------------------------------------------------
     ## Name:
@@ -628,7 +632,7 @@ class CITSLinkage:
     ##
     ## Returns: Nothing
     def removeLink(self,t,cits,orig,dest):
-        print("\t***REMOVING LINK(%s,%s) len=%s"%(orig.getUID(),dest.getUID(),len(self.linkcits[t])))
+        #print("\t***REMOVING LINK(%s,%s) len=%s"%(orig.getUID(),dest.getUID(),len(self.linkcits[t])))
         for link in self.linkcits[t]:
             if link.getOrignode() == orig.getUID() and link.getDestnode() == dest.getUID():
                 self.linkcits[t].remove(link)
@@ -644,7 +648,7 @@ class CITSLinkage:
                 dest.setCitlink(0)  #!!! not sure this is right... but seems so
                 
                 break #No need to continue... link destroyed
-        print("\tLINK REMOVED len=%s"%(len(self.linkcits[t])))
+        #print("\t***LINK REMOVED len=%s"%(len(self.linkcits[t])))
     ##----------------------------------------------------------------------
     ## Name:
     ##
@@ -785,7 +789,7 @@ class CITSLinkage:
         lv = 0
         cnt = 0
         #print("getSumInlinksP=>",type(cits))
-        for i in node.getOutlinks():
+        for i in node.getInlinks():
             other = cits.getCIT(i)
             if other.getCitlink() > 0:
                 lv += other.getCbo(param)
