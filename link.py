@@ -42,7 +42,7 @@ class LINK:
         #self.cboeu = 0
         #PIKE no diffpref, set high since sloce agents are more likely 
         #     they are to form cbo
-        #self.diffpref = 100000000.0
+        self.diffpref = 100000000.0
         
     def __eq__(self,other):
         return ((self.orignode == other.getOrignode()) and (self.destnode == other.getDestnode()))
@@ -60,7 +60,7 @@ class LINK:
     #PIKE no cboeu
     #def setCboeu(self,x): self.cboeu = x
     #PIKE no diffpref
-    #def setDiffpref(self, x): self.diffpref = x
+    def setDiffpref(self, x): self.diffpref = x
     
 
     #######################################################################
@@ -73,4 +73,4 @@ class LINK:
     #PIKE no cboeu
     #def getCboeu(self): return self.cboeu
     #PIKE no diffpref
-    #def getDiffpref(self,x): self.diffpref = x
+    def getDiffpref(self): return self.diffpref

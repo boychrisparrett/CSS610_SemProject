@@ -45,6 +45,8 @@ class LINK_CITS(LINK):
         self.cboeu = [0,0]
         #PIKE: changed needed ot be like the others
         self.diffpref = [0,0]
+        #!!!Was in netlogo code... how is this different from diffpref?
+        self.minpref = [0,0]
 
     ###################################################################
     ### Set/Get Inter/Temp Expected Utility
@@ -68,9 +70,11 @@ class LINK_CITS(LINK):
     def setPower(self,idx,x): self.power[idx] = x
     def setEu(self,idx,x): self.eu[idx] = x
     def setDiffpref(self,idx, x): self.diffpref[idx] = x
+    def setMinpref(self,idx, x): self.minpref[idx] = x
 
     def getCboeu(self,idx): return self.cboeu[idx]
     def getPref(self,idx): return self.pref[idx]
     def getPower(self,idx): return self.power[idx]
     def getEu(self,idx): return self.eu[idx]
     def getDiffpref(self,idx): return self.diffpref[idx]
+    def getMinpref(self,idx): return self.minpref[idx]

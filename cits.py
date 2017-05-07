@@ -45,6 +45,7 @@ class CITS(Agent):
         self.edu_scale = 0
         self.rawpower = 0
         self.minpref = 0
+        self.diffpref = 0
         self.temp_eu = 0
         self.stemp_eu = 0
         self.turcbo = 0
@@ -80,6 +81,7 @@ class CITS(Agent):
     def setEdu_Scale (self,x): self.edu_scale  = x
     def setRawpower(self,x): self.rawpower = x
     def setMinpref(self,x): self.minpref = x
+    def setDiffpref(self,x): self.diffpref = x
     def setTurcbo(self,x): self.turcbo = x
     def setStemp_Eu(self,x): self.stemp_eu = x
     def setSturcbo(self,x): self.sturcbo = x
@@ -100,6 +102,7 @@ class CITS(Agent):
     def getEdu_Scale(self): return self.edu_scale
     def getRawpower(self): return self.rawpower
     def getMinpref(self): return self.minpref
+    def getDiffpref(self): return self.diffpref
     def getTurcbo(self): return self.turcbo
     def getStemp_Eu(self): return self.stemp_eu
     def getSturcbo(self): return self.sturcbo
