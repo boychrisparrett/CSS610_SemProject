@@ -134,7 +134,7 @@ class StakeholderLinkage:
             else:
                 # NL: set stemp-eu max [scboeu1] of my-out-links with [cbolink? = 3]
                 
-                orig.setStemp_Eu( self.getCurrentMaxOutlinks(t,orig.getUID(),Entity.EU) )
+                orig.setStemp_Eu( self.getCurrentMaxOutlinks(t,orig,Entity.EU) )
              
             #ask end2 [
             #if empty? [scboeu1] of my-in-links with [cbolink? = 3][
@@ -143,7 +143,7 @@ class StakeholderLinkage:
                 dest.setStemp_Eu(0)
             else:
                 # NL: set stemp-eu max [scboeu1] of my-out-links with [cbolink? = 3]
-                dest.setStemp_Eu( self.getCurrentMaxOutlinks(t,dest.getUID(), Entity.EU) )
+                dest.setStemp_Eu( self.getCurrentMaxOutlinks(t,dest, Entity.EU) )
             #set hidden? TRUE
             #link.setTempEu(LINK_CITS.ORIGIDX, self.getCurrentMaxOutlinks(t,orig.getOutlinks(), Entity.EU))
             #link.setStemp(LINK_STAKEHOLDERS.ORIGIDX, self.getCurrentMaxOutlinks(t,orig.getOutlinks(), Entity.EU))
@@ -196,20 +196,20 @@ class StakeholderLinkage:
 
                 #!!! IS THIS CORRECT???
                 # PIKE Should be you are getting the max scbo preference of your outlinks as the code is only set to make one link a tick 
-                maxval = self.getCurrentMaxOutlinks(t, orig.getUID(),Entity.PRF)
+                maxval = self.getCurrentMaxOutlinks(t, orig, Entity.PRF)
                 #set sown-pref max [scbopref] of my-out-links with [cbolink? = ticks]
                 orig.setSown(Entity.PRF, maxval)
                 
-                orig.setown(Entity.PRF, maxval)
+                orig.setOwn(Entity.PRF, maxval)
                 
                 orig.setScbo(Entity.PRF, maxval)
                 
                
-                maxval = self.getCurrentMaxOutlinks(t, orig.getUID(),Entity.POW)
+                maxval = self.getCurrentMaxOutlinks(t, orig, Entity.POW)
                 #set scbo-power max [scbopower] of my-out-links with [cbolink? = ticks]
                 orig.setScbo(Entity.POW, maxval)
 
-                maxval = self.getMaxOutlinks(t, orig.getUID(),Entity.EU)
+                maxval = self.getMaxOutlinks(t, orig, Entity.EU)
                 #set sown-eu max [scboeu1] of my-out-links with [cbolink? = ticks]
                 orig.setSown(Entity.EU, maxval)
                 
@@ -228,12 +228,12 @@ class StakeholderLinkage:
                 dest.setOwn(Entity.PRF, link.getSown(Entity.PRF))
 
                 #set scbo-pref [scbo-pref] of other-end
-                dest.setScbo(Entity.PRF, orig.getCbo(Entity.PRF))
+                dest.setScbo(Entity.PRF, orig.getScbo(Entity.PRF))
 
                 #set scbo-power 0
                 dest.setScbo(Entity.POW,0)
 
-                maxval = self.getCurrentMaxOutlinks(t, dest.getUID(),Entity.EU)
+                maxval = self.getCurrentMaxInlinks(t, dest.getUID(),Entity.EU)
                 #set sown-eu max [scboeu2] of my-in-links with [cbolink? = ticks]
                 dest.setSown(Entity.EU, maxval)
 
@@ -251,9 +251,9 @@ class StakeholderLinkage:
                 #set sown-pref sown-pref
 
                 #set own-pref sown-pref
-                orig.setSown(Entity.PRF, orig.getSown(Entity.PRF))
-                orig.setSown(Entity.POW, orig.getSown(Entity.POW))
-                orig.setSown(Entity.EU, orig.getSown(Entity.EU))
+                orig.setOwn(Entity.PRF, orig.getSown(Entity.PRF))
+                orig.setOwn(Entity.POW, orig.getSown(Entity.POW))
+                orig.setOwn(Entity.EU, orig.getSown(Entity.EU))
 
                 #!!! WHY set 1 = 1?
                 #set sown-power sown-power
@@ -261,9 +261,9 @@ class StakeholderLinkage:
                 #ask end2 [
                 #set sown-pref sown-pref
                 #set own-pref sown-pref
-                dest.setSown(Entity.PRF, dest.getSown(Entity.PRF))
-                dest.setSown(Entity.POW, dest.getSown(Entity.POW))
-                dest.setSown(Entity.EU, dest.getSown(Entity.EU))
+                dest.setOwn(Entity.PRF, dest.getSown(Entity.PRF))
+                dest.setOwn(Entity.POW, dest.getSown(Entity.POW))
+                dest.setOwn(Entity.EU, dest.getSown(Entity.EU))
                 #set sown-power sown-power
         print("\tEnding STK ManageCurrentLink in %s seconds"%(time.time()-starttime))
         
@@ -328,14 +328,14 @@ class StakeholderLinkage:
                     #set sturcbo? 0
                     orig.setSturcbo(False)
                     #set scbo-power 0
-                    orig.setScbo(Entity.POW)
+                    orig.setScbo(Entity.POW,0)
                 #ask end2 [
                 #if count my-out-links with [cbolink? = 3] = 0 and count my-in-links with [cbolink? = ticks] = 0 [
                 if len(self.getLinksFromNode(t,dest)) == 0 and len(self.getLinksToNode(t,dest)) == 0:
                     #set sturcbo? 0
                     dest.setSturcbo(False)
                     #set scbo-power 0
-                    dest.setScbo(Entity.POW)
+                    dest.setScbo(Entity.POW,0)
                 #die
                 print("REMOVE STAKEGOLDER LINK 2")
                 link.removeLink(t,cits,orig,dest)
@@ -481,7 +481,7 @@ class StakeholderLinkage:
     def getCurrentMaxOutlinks(self, t, node, param):
         lv = 0.0
         for i in self.linkshldrs[t]:
-            if i.getOrignode() == node and lv < i.getScbo(param):
+            if i.getOrignode() == node.getUID() and lv < i.getScbo(param):
                     lv = i.getCbo(param)
         return lv
 
@@ -499,7 +499,7 @@ class StakeholderLinkage:
     def getCurrentMaxInlinks(self, t, node, param):
         lv = 0.0
         for i in self.linkshldrs[t]:
-            if i.getDestnode() == node and lv < i.getScbo(param):
+            if i.getDestnode() == node.getUID() and lv < i.getScbo(param):
                 lv = i.getCbo(param)
         return lv
 
@@ -517,7 +517,7 @@ class StakeholderLinkage:
     def getCurrentMinOutlinks(self, t, node, param):
         lv = 100000000.0
         for i in self.linkshldrs[t]:
-            if i.getOrignode() == node and lv > i.getScbo(param):
+            if i.getOrignode() == node.getUID() and lv > i.getScbo(param):
                     lv = i.getCbo(param)
         return lv
 
@@ -535,6 +535,6 @@ class StakeholderLinkage:
     def getCurrentMinInlinks(self, t, node, param):
         lv = 100000000.0
         for i in self.linkshldrs[t]:
-            if i.getDestnode() == node and lv > i.getScbo(param):
+            if i.getDestnode() == node.getUID() and lv > i.getScbo(param):
                 lv = i.getCbo(param)
         return lv

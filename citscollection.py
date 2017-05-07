@@ -250,7 +250,7 @@ class CITS_Collection:
             #Assess all OTHER nodes...
             if uid != c.getUID():
                 #detemrine if stakeholder
-                if c.getStakeholder(): 
+                if c.getStakeholder() == True: 
                 #print("\t against: ",c.getUID(), " with dist = ", dist)
                     #Node falls within talkspan distance
                     ret.append(c.getUID())
